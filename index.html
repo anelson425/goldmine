@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Goldmine</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="wrapper">
+    <canvas id="game"></canvas>
+
+    <!-- Touch controls for mobile -->
+    <div id="touch-controls">
+      <div id="touch-row">
+        <button class="touch-btn" id="btn-up">▲</button>
+      </div>
+      <div id="touch-row">
+        <button class="touch-btn" id="btn-left">◄</button>
+        <button class="touch-btn" id="btn-down">▼</button>
+        <button class="touch-btn" id="btn-right">►</button>
+      </div>
+      <div id="touch-row">
+        <button class="touch-btn action-btn" id="btn-interact">E</button>
+        <button class="touch-btn action-btn" id="btn-bomb">B</button>
+        <button class="touch-btn action-btn" id="btn-rope">R</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+  <script>
+    // Wire touch buttons to the game input queue after modules load
+    window.addEventListener('load', () => {
+      const map = {
+        'btn-up':       'up',
+        'btn-down':     'down',
+        'btn-left':     'left',
+        'btn-right':    'right',
+        'btn-interact': 'interact',
+        'btn-bomb':     'bomb',
+        'btn-rope':     'rope',
+      };
+      for (const [id, action] of Object.entries(map)) {
+        const btn = document.getElementById(id);
+        if (!btn) continue;
+        const fire = (e) => {
+          e.preventDefault();
+          // Access game input through a global reference set by main.js
+          if (window._gameInput) window._gameInput.queue.push(action);
+        };
+        btn.addEventListener('touchstart', fire, { passive: false });
+        btn.addEventListener('mousedown',  fire);
+      }
+    });
+  </script>
+</body>
+</html>

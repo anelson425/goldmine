@@ -1,0 +1,85 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #0a0a0f;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow-x: hidden;
+}
+
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 12px;
+}
+
+#game {
+  display: block;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.25);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  /* Scale up on large screens */
+  max-width: min(600px, 98vw);
+  width: min(600px, 98vw);
+  height: auto;
+  aspect-ratio: 1 / 1;
+}
+
+/* Touch controls */
+#touch-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+#touch-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.touch-btn {
+  width: 52px;
+  height: 52px;
+  font-size: 20px;
+  background: rgba(255, 215, 0, 0.12);
+  color: #ffd700;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: background 0.1s;
+}
+
+.touch-btn:active,
+.touch-btn.action-btn:active {
+  background: rgba(255, 215, 0, 0.35);
+}
+
+.action-btn {
+  font-size: 15px;
+  font-family: monospace;
+  font-weight: bold;
+  background: rgba(100, 80, 0, 0.25);
+  border-color: rgba(200, 160, 0, 0.5);
+}
+
+/* Hide touch controls on desktop */
+@media (hover: hover) and (pointer: fine) {
+  #touch-controls {
+    display: none;
+  }
+}
