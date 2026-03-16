@@ -129,7 +129,7 @@ export class Game {
     for (const dir of this.input.heldDirs) {
       const prevRow = player.row;
       const prevCol = player.col;
-      player.tryMove(dir, 0);
+      player.tryMove(dir, 0, this.entities);
       if (player.col !== prevCol || player.row !== prevRow) {
         if (player.digTarget && player.col === player.digTarget.col && player.row === player.digTarget.row) {
           const tx = player.col * TILE_SIZE + TILE_SIZE / 2;

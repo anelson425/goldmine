@@ -52,7 +52,7 @@ export class Player {
   }
 
   /** Called by the input system. direction: 'up'|'down'|'left'|'right' */
-  tryMove(dir, deltaMs) {
+  tryMove(dir, deltaMs, entities = []) {
     if (!this.alive) return;
     this._moveCooldown -= deltaMs;
     if (this._moveCooldown > 0) return;
@@ -64,6 +64,17 @@ export class Player {
 
     // Hard boundary — never act on the border columns or above the world
     if (tc < 1 || tc >= WORLD_COLS - 1 || tr < 0) return;
+
+    // Bump-attack: if an enemy occupies the target tile, attack it
+    const enemy = entities.find(
+      e => ['bat','goblin','troll','ogre'].includes(e.type) && e.col === tc && e.row === tr
+    );
+    if (enemy) {
+      enemy.takeDamage(this.pickaxeLevel);
+      this.digTarget = null;
+      this._moveCooldown = MOVE_COOLDOWN_MS;
+      return;
+    }
 
     const tileId = this.world.getTile(tc, tr);
     const def    = getTileDef(tileId);
