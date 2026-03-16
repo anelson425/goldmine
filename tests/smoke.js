@@ -111,6 +111,30 @@ console.log('\n[Scoring]');
   assert(s.spend(100) === false, 'spend fails without enough gold');
 }
 
+// ── Camera ─────────────────────────────────────────────────────────────────
+console.log('\n[Camera]');
+{
+  const { Camera } = await import('../src/systems/camera.js');
+  const cam = new Camera();
+
+  assert(cam._nudgeX === 0, 'Camera._nudgeX initialises to 0');
+  assert(cam._nudgeY === 0, 'Camera._nudgeY initialises to 0');
+
+  cam.nudge(3, 5);
+  assert(cam._nudgeX === 3, 'nudge() sets _nudgeX');
+  assert(cam._nudgeY === 5, 'nudge() sets _nudgeY');
+
+  cam.update(0.016);
+  assert(cam._nudgeX === 0, 'update() clears _nudgeX');
+  assert(cam._nudgeY === 0, 'update() clears _nudgeY');
+
+  // worldToScreen with nudge — camera at origin, no shake
+  cam.nudge(7, -3);
+  const { sx, sy } = cam.worldToScreen(100, 200);
+  assert(sx === 107, 'worldToScreen applies _nudgeX');
+  assert(sy === 197, 'worldToScreen applies _nudgeY');
+}
+
 // ── Summary ────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} tests: ${passed} passed, ${failed} failed.\n`);
 if (failed > 0) process.exit(1);

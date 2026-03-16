@@ -6,6 +6,8 @@ export class Camera {
     this.y = 0;
     this.shakeTimer     = 0;
     this.shakeIntensity = 0;
+    this._nudgeX = 0;   // one-frame pixel offset, cleared each update()
+    this._nudgeY = 0;
   }
 
   /** Follow player; centres viewport on them. */
@@ -24,11 +26,18 @@ export class Camera {
     this.shakeTimer     = duration;
   }
 
+  nudge(dx, dy) {
+    this._nudgeX = dx;
+    this._nudgeY = dy;
+  }
+
   update(delta) {
     if (this.shakeTimer > 0) {
       this.shakeTimer = Math.max(0, this.shakeTimer - delta);
       if (this.shakeTimer === 0) this.shakeIntensity = 0;
     }
+    this._nudgeX = 0;
+    this._nudgeY = 0;
   }
 
   /** Returns current shake offset {dx, dy}. */
@@ -44,7 +53,10 @@ export class Camera {
   /** Convert world pixel coords to screen pixel coords. */
   worldToScreen(wx, wy) {
     const { dx, dy } = this.shakeOffset;
-    return { sx: wx - this.x + dx, sy: wy - this.y + dy };
+    return {
+      sx: wx - this.x + dx + this._nudgeX,
+      sy: wy - this.y + dy + this._nudgeY,
+    };
   }
 
   /** First visible tile column. */
