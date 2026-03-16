@@ -44,8 +44,9 @@ export class Audio {
 
   _resume() {
     if (this._ctx && this._ctx.state === 'suspended') {
-      this._ctx.resume().catch(() => {});
+      return this._ctx.resume().catch(() => {});
     }
+    return Promise.resolve();
   }
 
   _beep({ freq = 440, type = 'square', duration = 0.08, volume = 0.15, decay = 0.08 } = {}) {
@@ -102,14 +103,16 @@ export class Audio {
 
   startMusic() {
     if (!this._ctx || this._musicOn) return;
-    this._resume();
     this._musicOn   = true;
     this._musicGain = this._ctx.createGain();
     this._musicGain.gain.setValueAtTime(0, this._ctx.currentTime);
-    this._musicGain.gain.linearRampToValueAtTime(0.13, this._ctx.currentTime + 3);
     this._musicGain.connect(this._ctx.destination);
-    this._musicNext = this._ctx.currentTime + 0.1;
-    this._musicLoop();
+    this._resume().then(() => {
+      if (!this._musicOn) return;
+      this._musicGain.gain.linearRampToValueAtTime(0.13, this._ctx.currentTime + 3);
+      this._musicNext = this._ctx.currentTime + 0.1;
+      this._musicLoop();
+    });
   }
 
   stopMusic() {
