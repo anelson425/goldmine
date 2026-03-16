@@ -25,6 +25,7 @@ export class Input {
       e: 'interact', E: 'interact', Enter: 'interact',
       b: 'bomb',     B: 'bomb',
       c: 'rope',     C: 'rope',
+      m: 'music',    M: 'music',
     };
 
     this._bound.keydown = (e) => {

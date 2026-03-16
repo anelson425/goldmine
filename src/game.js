@@ -67,6 +67,7 @@ export class Game {
     this.player    = new Player(this.world, this.scoring);
     this._wentUnderground = false;  // shop can't trigger until player digs down
     this.state     = STATE.PLAYING;
+    this.audio.startMusic();
   }
 
   _openShop() {
@@ -90,6 +91,10 @@ export class Game {
 
   update(delta) {
     this._phase += delta;
+
+    // M key toggles music from any state — scan queue without consuming other actions
+    const mi = this.input.queue.indexOf('music');
+    if (mi !== -1) { this.input.queue.splice(mi, 1); this.audio.toggleMusic(); }
 
     switch (this.state) {
       case STATE.MENU:      this._updateMenu(delta);     break;
