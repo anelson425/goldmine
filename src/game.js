@@ -194,8 +194,10 @@ export class Game {
     for (const e of this.entities) {
       if (['bat','goblin','troll','ogre'].includes(e.type)) {
         if (e.col === player.col && e.row === player.row) {
-          particles.hitEffect(player.px + TILE_SIZE/2, player.py + TILE_SIZE/2);
-          this.audio.hurt();
+          if (player.iFrames <= 0) {
+            particles.hitEffect(player.px + TILE_SIZE/2, player.py + TILE_SIZE/2);
+            this.audio.hurt();
+          }
         }
       }
     }
