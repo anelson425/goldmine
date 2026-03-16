@@ -122,13 +122,24 @@ export class Game {
         player.tryMove(action, 0);
 
         // Particle + audio on dig
+        const dirOffsets = { up: [0,-2], down: [0,2], left: [-2,0], right: [2,0] };
+
         if (player.col !== prevCol || player.row !== prevRow) {
-          // movement
+          // Player moved — check if this was a tile destroy (player is now on their digTarget)
+          if (player.digTarget && player.col === player.digTarget.col && player.row === player.digTarget.row) {
+            const tx = player.col * TILE_SIZE + TILE_SIZE / 2;
+            const ty = player.row * TILE_SIZE + TILE_SIZE / 2;
+            particles.digSparks(tx, ty);
+            particles.digSparks(tx, ty);  // double burst on break
+            this.audio.dig();
+          }
         } else if (player.digTarget) {
-          particles.digSparks(
-            player.digTarget.col * TILE_SIZE + TILE_SIZE / 2,
-            player.digTarget.row * TILE_SIZE + TILE_SIZE / 2,
-          );
+          // Dig hit — tile survived, player didn't move
+          const tx = player.digTarget.col * TILE_SIZE + TILE_SIZE / 2;
+          const ty = player.digTarget.row * TILE_SIZE + TILE_SIZE / 2;
+          particles.digSparks(tx, ty);
+          const [nx, ny] = dirOffsets[action] ?? [0, 0];
+          camera.nudge(nx, ny);  // 2px nudge toward dig direction
           this.audio.dig();
         }
 
