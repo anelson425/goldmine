@@ -12,16 +12,4 @@ const loop = new GameLoop(game);
 // Expose input for touch controls defined in index.html
 window._gameInput = game.input;
 
-// Map Enter key to 'interact' action in all states
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    game.input.queue.push('interact');
-  }
-  // C key = continue from shop
-  if (e.key === 'c' || e.key === 'C') {
-    game.input.queue.push('rope');
-  }
-});
-
 loop.start();

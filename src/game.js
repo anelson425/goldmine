@@ -166,10 +166,11 @@ export class Game {
     }
 
     // Player update
+    const wasOnSurface = player.onSurface;
     player.update(delta);
 
-    // Check surfacing
-    if (player.onSurface && player.alive) {
+    // Check surfacing — only trigger on the frame the player transitions underground→surface
+    if (player.onSurface && !wasOnSurface && player.alive) {
       this._openShop();
       return;
     }
