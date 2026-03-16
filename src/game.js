@@ -101,10 +101,10 @@ export class Game {
     let action;
     while ((action = this.input.consume())) {
       if (action === 'interact' || action === 'bomb') {
-        // Enter mapped elsewhere; check raw keydown via a flag
+        this._startGame();
+        return;
       }
     }
-    // Enter key handled via _menuKeydown
   }
 
   _updatePlaying(delta) {
