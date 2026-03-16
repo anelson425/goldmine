@@ -90,10 +90,9 @@ export class Renderer {
           }
         }
 
-        // Gem shine indicator
+        // Gem indicator — diamond shape + facet highlight + sparkle
         if ([TILE.RUBY, TILE.EMERALD, TILE.DIAMOND].includes(tileId)) {
-          ctx.fillStyle = 'rgba(255,255,255,0.25)';
-          ctx.fillRect(sx + 4, sy + 4, 8, 8);
+          _drawGem(ctx, sx, sy, T, tileId, _lavaPhase, col, row);
         }
 
         // Surface grass texture
@@ -174,4 +173,47 @@ function _drawCracks(ctx, sx, sy, T, ratio) {
   }
 
   ctx.restore();
+}
+
+// Gem colours: light facet tint per gem type
+const GEM_FACET = {
+  [TILE.RUBY]:    'rgba(255,120,120,0.55)',
+  [TILE.EMERALD]: 'rgba(100,255,140,0.55)',
+  [TILE.DIAMOND]: 'rgba(180,240,255,0.60)',
+};
+
+function _drawGem(ctx, sx, sy, T, tileId, phase, col, row) {
+  const cx = sx + T / 2;
+  const cy = sy + T / 2;
+  const half = T * 0.28;   // half-size of rotated diamond
+
+  // Dark backing to make gem pop from tile colour
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.30)';
+  ctx.beginPath();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillRect(-half, -half, half * 2, half * 2);
+  ctx.restore();
+
+  // Bright facet fill (rotated square = diamond silhouette)
+  ctx.save();
+  ctx.fillStyle = GEM_FACET[tileId] ?? 'rgba(255,255,255,0.4)';
+  ctx.beginPath();
+  ctx.translate(cx, cy);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillRect(-half + 2, -half + 2, (half - 2) * 2, (half - 2) * 2);
+  ctx.restore();
+
+  // Top-left highlight (gives 3-D facet feel)
+  ctx.fillStyle = 'rgba(255,255,255,0.70)';
+  ctx.fillRect(sx + T * 0.22, sy + T * 0.14, 5, 5);
+
+  // Animated sparkle — tiny cross that pulses
+  const spark = 0.4 + Math.sin(phase * 2.5 + col * 1.7 + row * 2.3) * 0.4;
+  ctx.globalAlpha = spark;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(cx - 1, cy - 4, 2, 8);   // vertical bar
+  ctx.fillRect(cx - 4, cy - 1, 8, 2);   // horizontal bar
+  ctx.globalAlpha = 1;
 }
