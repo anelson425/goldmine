@@ -33,7 +33,11 @@ export class Input {
       if (!action) return;
       e.preventDefault();
       if (DIRS.has(action)) {
-        this.heldDirs.add(action);   // track held; game loop polls this
+        this.heldDirs.add(action);        // game loop polls for continuous movement
+        if (!this._held[e.key]) {
+          this._held[e.key] = 1;
+          this.queue.push(action);        // also queue once for menu/shop navigation
+        }
       } else if (!this._held[e.key]) {
         this._held[e.key] = 1;
         this.queue.push(action);
