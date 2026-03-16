@@ -152,6 +152,9 @@ export class Player {
   update(delta) {
     if (!this.alive) return;
 
+    // Move cooldown countdown
+    if (this._moveCooldown > 0) this._moveCooldown = Math.max(0, this._moveCooldown - delta * 1000);
+
     // Ghost mode countdown
     if (this.ghostMode > 0) this.ghostMode = Math.max(0, this.ghostMode - delta);
 
