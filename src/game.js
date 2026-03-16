@@ -112,6 +112,7 @@ export class Game {
     const world    = this.world;
     const camera   = this.camera;
     const particles= this.particles;
+    const dirOffsets = { up: [0,-2], down: [0,2], left: [-2,0], right: [2,0] };
 
     // Drain input queue
     let action;
@@ -122,7 +123,6 @@ export class Game {
         player.tryMove(action, 0);
 
         // Particle + audio on dig
-        const dirOffsets = { up: [0,-2], down: [0,2], left: [-2,0], right: [2,0] };
 
         if (player.col !== prevCol || player.row !== prevRow) {
           // Player moved — check if this was a tile destroy (player is now on their digTarget)
@@ -205,6 +205,8 @@ export class Game {
     for (const e of this.entities) {
       if (['bat','goblin','troll','ogre'].includes(e.type)) {
         if (e.col === player.col && e.row === player.row) {
+          // Feedback only — takeDamage() is called by each entity's update() above;
+          // guard here prevents audio/particle spam during the iFrames window.
           if (player.iFrames <= 0) {
             particles.hitEffect(player.px + TILE_SIZE/2, player.py + TILE_SIZE/2);
             this.audio.hurt();
