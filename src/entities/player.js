@@ -42,8 +42,8 @@ export class Player {
     this.iFrames     = 0;        // seconds of invincibility remaining after a hit
 
     // Pixel position for smooth rendering (interpolated)
-    this.px = this.col * 40;
-    this.py = this.row * 40;
+    this.px = this.col * TILE_SIZE;
+    this.py = this.row * TILE_SIZE;
   }
 
   get digStrength() {
