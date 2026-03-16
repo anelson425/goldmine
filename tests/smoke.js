@@ -125,8 +125,8 @@ console.log('\n[Camera]');
   assert(cam._nudgeY === 5, 'nudge() sets _nudgeY');
 
   cam.update(0.016);
-  assert(cam._nudgeX === 0, 'update() clears _nudgeX');
-  assert(cam._nudgeY === 0, 'update() clears _nudgeY');
+  assert(cam._nudgeX === 3, 'update() does not clear _nudgeX (cleared by game loop instead)');
+  assert(cam._nudgeY === 5, 'update() does not clear _nudgeY (cleared by game loop instead)');
 
   // worldToScreen with nudge — camera at origin, no shake
   cam.nudge(7, -3);

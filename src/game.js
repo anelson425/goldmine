@@ -108,6 +108,10 @@ export class Game {
   }
 
   _updatePlaying(delta) {
+    // Clear camera nudge from previous frame at start of this frame
+    this.camera._nudgeX = 0;
+    this.camera._nudgeY = 0;
+
     const player   = this.player;
     const world    = this.world;
     const camera   = this.camera;

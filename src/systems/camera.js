@@ -36,8 +36,6 @@ export class Camera {
       this.shakeTimer = Math.max(0, this.shakeTimer - delta);
       if (this.shakeTimer === 0) this.shakeIntensity = 0;
     }
-    this._nudgeX = 0;
-    this._nudgeY = 0;
   }
 
   /** Returns current shake offset {dx, dy}. */
