@@ -69,12 +69,11 @@ export class Renderer {
           ctx.strokeRect(sx + 0.5, sy + 0.5, T - 1, T - 1);
         }
 
-        // HP crack overlay on partially-dug tiles
-        if (def.diggable) {
+        // Progressive crack overlay on partially-dug tiles
+        if (def.diggable && def.hp > 1) {
           const hp = world.getTileHP(col, row);
-          if (hp < def.hp && def.hp > 1) {
-            ctx.fillStyle = 'rgba(0,0,0,0.35)';
-            ctx.fillRect(sx, sy, T, T);
+          if (hp < def.hp) {
+            _drawCracks(ctx, sx, sy, T, hp / def.hp);
           }
         }
 
@@ -121,4 +120,45 @@ export class Renderer {
     ctx.fillStyle = ['#aaa', '#c0a020', '#00bcd4'][player.pickaxeLevel - 1];
     ctx.fillRect(sx + T - 10, sy + T - 10, 6, 6);
   }
+}
+
+function _drawCracks(ctx, sx, sy, T, ratio) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+  ctx.lineCap = 'round';
+
+  if (ratio < 0.25) {
+    // Stage 3: heavy — 6 lines + heavy darken
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(sx, sy, T, T);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx + T*0.30, sy + T*0.08); ctx.lineTo(sx + T*0.53, sy + T*0.47);
+    ctx.moveTo(sx + T*0.53, sy + T*0.47); ctx.lineTo(sx + T*0.25, sy + T*0.92);
+    ctx.moveTo(sx + T*0.53, sy + T*0.47); ctx.lineTo(sx + T*0.83, sy + T*0.63);
+    ctx.moveTo(sx + T*0.13, sy + T*0.37); ctx.lineTo(sx + T*0.42, sy + T*0.53);
+    ctx.moveTo(sx + T*0.67, sy + T*0.17); ctx.lineTo(sx + T*0.87, sy + T*0.37);
+    ctx.moveTo(sx + T*0.08, sy + T*0.75); ctx.lineTo(sx + T*0.33, sy + T*0.87);
+    ctx.stroke();
+  } else if (ratio < 0.50) {
+    // Stage 2: medium — 4 lines + light darken
+    ctx.fillStyle = 'rgba(0,0,0,0.20)';
+    ctx.fillRect(sx, sy, T, T);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(sx + T*0.30, sy + T*0.08); ctx.lineTo(sx + T*0.53, sy + T*0.47);
+    ctx.moveTo(sx + T*0.53, sy + T*0.47); ctx.lineTo(sx + T*0.25, sy + T*0.92);
+    ctx.moveTo(sx + T*0.58, sy + T*0.33); ctx.lineTo(sx + T*0.75, sy + T*0.67);
+    ctx.moveTo(sx + T*0.17, sy + T*0.50); ctx.lineTo(sx + T*0.42, sy + T*0.63);
+    ctx.stroke();
+  } else {
+    // Stage 1: hairline — 2 lines, no darken
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(sx + T*0.33, sy + T*0.10); ctx.lineTo(sx + T*0.47, sy + T*0.53);
+    ctx.moveTo(sx + T*0.47, sy + T*0.53); ctx.lineTo(sx + T*0.27, sy + T*0.88);
+    ctx.stroke();
+  }
+
+  ctx.restore();
 }
