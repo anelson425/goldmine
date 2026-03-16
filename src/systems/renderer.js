@@ -52,15 +52,28 @@ export class Renderer {
         // Base tile color
         let color = def.color;
         if (tileId === TILE.LAVA) {
-          // Pulsing lava
+          // Pulsing orange base (more yellow than ruby's crimson)
           const pulse = Math.sin(_lavaPhase * 4 + col * 0.5 + row * 0.5);
-          const r = Math.floor(255);
-          const g = Math.floor(50 + pulse * 30);
-          color = `rgb(${r},${g},0)`;
+          const g = Math.floor(90 + pulse * 40);
+          color = `rgb(255,${g},0)`;
         }
 
         ctx.fillStyle = color;
         ctx.fillRect(sx, sy, T, T);
+
+        // Lava glow overlay — bright animated yellow centre + hot spots
+        if (tileId === TILE.LAVA) {
+          const t  = _lavaPhase * 3 + col * 1.3 + row * 0.9;
+          const t2 = _lavaPhase * 5 + col * 0.7 + row * 1.1;
+          // Inner glow
+          const glow = 0.35 + Math.sin(t) * 0.2;
+          ctx.fillStyle = `rgba(255,220,0,${glow})`;
+          ctx.fillRect(sx + 5, sy + 5, T - 10, T - 10);
+          // Bright centre hot spot
+          const spot = 0.5 + Math.sin(t2) * 0.35;
+          ctx.fillStyle = `rgba(255,255,180,${spot})`;
+          ctx.fillRect(sx + T / 2 - 3, sy + T / 2 - 3, 6, 6);
+        }
 
         // Subtle border on solid tiles
         if (def.solid && tileId !== TILE.SURFACE) {
