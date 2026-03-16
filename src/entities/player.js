@@ -1,5 +1,5 @@
 import {
-  TILE_SIZE,
+  TILE_SIZE, WORLD_COLS,
   PLAYER_START_HP, PLAYER_MAX_HP_BASE, PLAYER_OXYGEN_BASE,
   OXYGEN_DEPTH_ROW, OXYGEN_DRAIN_RATE, OXYGEN_HP_DRAIN,
   PICKAXE, TILE, MOVE_COOLDOWN_MS,
@@ -61,6 +61,9 @@ export class Player {
     const [dc, dr] = deltas[dir];
     const tc = this.col + dc;
     const tr = this.row + dr;
+
+    // Hard boundary — never act on the border columns or above the world
+    if (tc < 1 || tc >= WORLD_COLS - 1 || tr < 0) return;
 
     const tileId = this.world.getTile(tc, tr);
     const def    = getTileDef(tileId);
