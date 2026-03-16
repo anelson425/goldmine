@@ -135,6 +135,64 @@ console.log('\n[Camera]');
   assert(sy === 197, 'worldToScreen applies _nudgeY');
 }
 
+// ── Player ─────────────────────────────────────────────────────────────────
+console.log('\n[Player]');
+{
+  const { TILE_SIZE } = await import('../src/constants.js');
+  const { Player } = await import('../src/entities/player.js');
+
+  const world  = new World();
+  const scoring = new Scoring();
+  const player = new Player(world, scoring);
+
+  // iFrames initial state
+  assert(player.iFrames === 0, 'player.iFrames initialises to 0');
+
+  // takeDamage sets iFrames and reduces hp
+  const hpBefore = player.hp;
+  player.takeDamage(10);
+  assert(player.hp === hpBefore - 10, 'takeDamage reduces hp');
+  assert(player.iFrames === 0.5, 'takeDamage sets iFrames to 0.5');
+
+  // takeDamage is blocked while iFrames > 0
+  const hpAfterHit = player.hp;
+  player.takeDamage(10);
+  assert(player.hp === hpAfterHit, 'takeDamage is ignored while iFrames > 0');
+
+  // update() counts down iFrames
+  player.update(0.1);
+  assert(Math.abs(player.iFrames - 0.4) < 0.001, 'update() decrements iFrames by delta');
+
+  // Lerp: set px far from target, verify it moves toward it after update()
+  player.iFrames = 0;  // clear so takeDamage works
+  const targetPx = player.col * TILE_SIZE;
+  player.px = targetPx - 100;  // force px far from target
+  player.update(0.016);
+  assert(player.px > targetPx - 100, 'update() lerps px toward col*TILE_SIZE');
+  assert(player.px < targetPx, 'lerp does not overshoot in one frame at 60fps delta');
+
+  // useRope snaps px/py immediately (no glide)
+  player.hasRope = true;
+  player.row = 20;
+  player.col = 5;
+  player.px = 5 * TILE_SIZE;
+  player.py = 20 * TILE_SIZE;
+  player.useRope();
+  assert(player.px === 15 * TILE_SIZE, 'useRope snaps px to surface col');
+  assert(player.py === 2  * TILE_SIZE, 'useRope snaps py to surface row');
+
+  // digTarget is cleared when player moves freely
+  player.digTarget = { col: 99, row: 99 };  // stale reference
+  // Place player at a known-empty tile and move to another empty tile
+  // Surface row is SURFACE tiles — player.row=2 is the surface
+  // Move to col 14 (player is currently at col 15 after rope)
+  // Surface row tiles are not diggable so tryMove should free-move if empty
+  // Set an EMPTY tile to the left of player's current position
+  world.setTile(14, 2, TILE.EMPTY);
+  player.tryMove('left', 0);
+  assert(player.digTarget === null, 'tryMove into free tile clears digTarget');
+}
+
 // ── Summary ────────────────────────────────────────────────────────────────
 console.log(`\n${passed + failed} tests: ${passed} passed, ${failed} failed.\n`);
 if (failed > 0) process.exit(1);

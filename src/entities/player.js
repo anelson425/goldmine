@@ -1,4 +1,5 @@
 import {
+  TILE_SIZE,
   PLAYER_START_HP, PLAYER_MAX_HP_BASE, PLAYER_OXYGEN_BASE,
   OXYGEN_DEPTH_ROW, OXYGEN_DRAIN_RATE, OXYGEN_HP_DRAIN,
   PICKAXE, TILE, MOVE_COOLDOWN_MS,
@@ -38,6 +39,7 @@ export class Player {
     this.hasRope     = false;
     this.hasLantern  = false;
     this.ghostMode   = 0;        // seconds remaining
+    this.iFrames     = 0;        // seconds of invincibility remaining after a hit
 
     // Pixel position for smooth rendering (interpolated)
     this.px = this.col * 40;
@@ -100,6 +102,7 @@ export class Player {
       // Move freely
       this.col = tc;
       this.row = tr;
+      this.digTarget = null;   // clear stale reference to prevent false destroy-detection
       this._moveCooldown = MOVE_COOLDOWN_MS;
     }
   }
@@ -122,10 +125,14 @@ export class Player {
     this.hasRope = false;
     this.row = 2;
     this.col = 15;
+    this.px = this.col * TILE_SIZE;
+    this.py = this.row * TILE_SIZE;
   }
 
   takeDamage(amount) {
+    if (this.iFrames > 0) return;
     this.hp = Math.max(0, this.hp - amount);
+    this.iFrames = 0.5;
     if (this.hp <= 0) this._die();
   }
 
@@ -148,6 +155,9 @@ export class Player {
     // Ghost mode countdown
     if (this.ghostMode > 0) this.ghostMode = Math.max(0, this.ghostMode - delta);
 
+    // iFrames countdown
+    if (this.iFrames > 0) this.iFrames = Math.max(0, this.iFrames - delta);
+
     // Oxygen depletion below depth threshold
     this.onSurface = this.row <= 2;
     if (this.row > OXYGEN_DEPTH_ROW) {
@@ -167,9 +177,9 @@ export class Player {
       this.digTimer = Math.max(0, this.digTimer - delta);
     }
 
-    // Smooth pixel position (snap to grid for now; can be interpolated later)
-    this.px = this.col * 40;
-    this.py = this.row * 40;
+    // Smooth pixel position (lerp toward grid position)
+    this.px += (this.col * TILE_SIZE - this.px) * Math.min(1, delta * 12);
+    this.py += (this.row * TILE_SIZE - this.py) * Math.min(1, delta * 12);
 
     // Ensure world is generated ahead
     this.world.ensureGenerated(this.row);
