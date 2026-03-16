@@ -65,6 +65,7 @@ export class Game {
     this._lastSpawnRow  = 0;
     this._spawnCooldown = 0;
     this.player    = new Player(this.world, this.scoring);
+    this._wentUnderground = false;  // shop can't trigger until player digs down
     this.state     = STATE.PLAYING;
   }
 
@@ -165,12 +166,15 @@ export class Game {
       }
     }
 
+    // Track whether player has gone underground this run
+    if (player.row >= 5) this._wentUnderground = true;
+
     // Player update
     const wasOnSurface = player.onSurface;
     player.update(delta);
 
-    // Check surfacing — only trigger on the frame the player transitions underground→surface
-    if (player.onSurface && !wasOnSurface && player.alive) {
+    // Check surfacing — only trigger after player has gone underground this run
+    if (player.onSurface && !wasOnSurface && this._wentUnderground && player.alive) {
       this._openShop();
       return;
     }
