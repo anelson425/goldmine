@@ -109,7 +109,7 @@ export class Audio {
     this._musicGain.connect(this._ctx.destination);
     this._resume().then(() => {
       if (!this._musicOn) return;
-      this._musicGain.gain.linearRampToValueAtTime(0.35, this._ctx.currentTime + 3);
+      this._musicGain.gain.linearRampToValueAtTime(0.43, this._ctx.currentTime + 3);
       this._musicNext = this._ctx.currentTime + 0.1;
       this._musicLoop();
     });
