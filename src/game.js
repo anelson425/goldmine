@@ -120,43 +120,33 @@ export class Game {
     const particles= this.particles;
     const dirOffsets = { up: [0,-2], down: [0,2], left: [-2,0], right: [2,0] };
 
-    // Drain input queue
-    let action;
-    while ((action = this.input.consume())) {
-      if (['up','down','left','right'].includes(action)) {
-        const prevRow = player.row;
-        const prevCol = player.col;
-        player.tryMove(action, 0);
-
-        // Particle + audio on dig
-
-        if (player.col !== prevCol || player.row !== prevRow) {
-          // Player moved — check if this was a tile destroy (player is now on their digTarget)
-          if (player.digTarget && player.col === player.digTarget.col && player.row === player.digTarget.row) {
-            const tx = player.col * TILE_SIZE + TILE_SIZE / 2;
-            const ty = player.row * TILE_SIZE + TILE_SIZE / 2;
-            particles.digSparks(tx, ty);
-            particles.digSparks(tx, ty);  // double burst on break
-            this.audio.dig();
-          }
-        } else if (player.digTarget) {
-          // Dig hit — tile survived, player didn't move
-          const tx = player.digTarget.col * TILE_SIZE + TILE_SIZE / 2;
-          const ty = player.digTarget.row * TILE_SIZE + TILE_SIZE / 2;
+    // Held direction keys — move every frame (throttled by player._moveCooldown)
+    for (const dir of this.input.heldDirs) {
+      const prevRow = player.row;
+      const prevCol = player.col;
+      player.tryMove(dir, 0);
+      if (player.col !== prevCol || player.row !== prevRow) {
+        if (player.digTarget && player.col === player.digTarget.col && player.row === player.digTarget.row) {
+          const tx = player.col * TILE_SIZE + TILE_SIZE / 2;
+          const ty = player.row * TILE_SIZE + TILE_SIZE / 2;
           particles.digSparks(tx, ty);
-          const [nx, ny] = dirOffsets[action] ?? [0, 0];
-          camera.nudge(nx, ny);  // 2px nudge toward dig direction
+          particles.digSparks(tx, ty);
           this.audio.dig();
         }
+      } else if (player.digTarget) {
+        const tx = player.digTarget.col * TILE_SIZE + TILE_SIZE / 2;
+        const ty = player.digTarget.row * TILE_SIZE + TILE_SIZE / 2;
+        particles.digSparks(tx, ty);
+        const [nx, ny] = dirOffsets[dir] ?? [0, 0];
+        camera.nudge(nx, ny);
+        this.audio.dig();
+      }
+    }
 
-        // Gold sparkle
-        if (player.col !== prevCol || player.row !== prevRow) {
-          const tileHere = world.getTile(player.col, player.row);
-          if (tileHere === TILE.EMPTY) {
-            // Check if we just collected something
-          }
-        }
-      } else if (action === 'interact') {
+    // Drain input queue (non-direction actions only; directions handled by heldDirs above)
+    let action;
+    while ((action = this.input.consume())) {
+      if (action === 'interact') {
         // Check adjacent NPCs
         this._tryInteractNPC();
       } else if (action === 'bomb') {

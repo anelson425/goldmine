@@ -4,11 +4,14 @@
  * Supports keyboard (WASD / arrows) and on-screen touch buttons.
  */
 
+const DIRS = new Set(['up', 'down', 'left', 'right']);
+
 export class Input {
   constructor() {
-    this.queue = [];          // ['up'|'down'|'left'|'right'|'interact'|'bomb'|'rope']
-    this._held  = {};         // key -> ms held (for auto-repeat)
-    this._bound = {};
+    this.queue    = [];       // ['up'|'down'|'left'|'right'|'interact'|'bomb'|'rope']
+    this.heldDirs = new Set();// direction keys currently physically held
+    this._held    = {};       // non-direction keys held (prevents repeat)
+    this._bound   = {};
 
     this._bind();
   }
@@ -28,13 +31,17 @@ export class Input {
       const action = KEY_MAP[e.key];
       if (!action) return;
       e.preventDefault();
-      if (!this._held[e.key]) {
+      if (DIRS.has(action)) {
+        this.heldDirs.add(action);   // track held; game loop polls this
+      } else if (!this._held[e.key]) {
         this._held[e.key] = 1;
         this.queue.push(action);
       }
     };
 
     this._bound.keyup = (e) => {
+      const action = KEY_MAP[e.key];
+      if (action && DIRS.has(action)) this.heldDirs.delete(action);
       delete this._held[e.key];
     };
 
@@ -50,6 +57,7 @@ export class Input {
   /** Discard all pending actions. Call on state transitions to prevent bleed-over. */
   flush() {
     this.queue.length = 0;
+    this.heldDirs.clear();
   }
 
   /** Peek whether any directional input is queued. */
