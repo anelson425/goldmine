@@ -47,6 +47,11 @@ export class Input {
     return this.queue.shift() ?? null;
   }
 
+  /** Discard all pending actions. Call on state transitions to prevent bleed-over. */
+  flush() {
+    this.queue.length = 0;
+  }
+
   /** Peek whether any directional input is queued. */
   hasPending() {
     return this.queue.length > 0;

@@ -55,6 +55,7 @@ export class Game {
   // ── State transitions ─────────────────────────────────────────────────────
 
   _startGame() {
+    this.input.flush();   // discard any stale actions from menu/shop
     this.world     = new World();
     this.scoring.newRun();
     this.camera    = new Camera();
