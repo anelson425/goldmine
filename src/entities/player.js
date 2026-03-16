@@ -13,7 +13,7 @@ export class Player {
 
     // Grid position
     this.col = Math.floor(15);   // start near centre
-    this.row = 2;                // surface row
+    this.row = 3;                // just below surface (row 2 triggers shop)
 
     // Stats
     this.maxHp      = PLAYER_MAX_HP_BASE;
@@ -24,7 +24,7 @@ export class Player {
 
     // State
     this.alive       = true;
-    this.onSurface   = true;
+    this.onSurface   = false;
     this.interacting = false;    // set when adjacent to NPC and E pressed
 
     // Animation / dig feedback
