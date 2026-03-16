@@ -19,9 +19,9 @@ export class Input {
       ArrowDown:  'down',  s: 'down',  S: 'down',
       ArrowLeft:  'left',  a: 'left',  A: 'left',
       ArrowRight: 'right', d: 'right', D: 'right',
-      e: 'interact', E: 'interact',
+      e: 'interact', E: 'interact', Enter: 'interact',
       b: 'bomb',     B: 'bomb',
-      r: 'rope',     R: 'rope',
+      c: 'rope',     C: 'rope',
     };
 
     this._bound.keydown = (e) => {
