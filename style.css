@@ -35,6 +35,23 @@ html, body {
   aspect-ratio: 1 / 1;
 }
 
+/* Volume slider */
+#volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffd700;
+  font-size: 18px;
+  width: min(600px, 98vw);
+}
+
+#vol-slider {
+  flex: 1;
+  accent-color: #ffd700;
+  height: 6px;
+  cursor: pointer;
+}
+
 /* Touch controls */
 #touch-controls {
   display: flex;

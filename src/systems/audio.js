@@ -35,11 +35,12 @@ export class Audio {
     } catch {
       this._ctx = null;
     }
-    this.muted        = false;
-    this._musicOn     = false;
-    this._musicGain   = null;
-    this._musicNext   = 0;
-    this._musicTimer  = null;
+    this.muted         = false;
+    this._masterVolume = 0.75;
+    this._musicOn      = false;
+    this._musicGain    = null;
+    this._musicNext    = 0;
+    this._musicTimer   = null;
   }
 
   _resume() {
@@ -109,7 +110,7 @@ export class Audio {
     this._musicGain.connect(this._ctx.destination);
     this._resume().then(() => {
       if (!this._musicOn) return;
-      this._musicGain.gain.linearRampToValueAtTime(0.75, this._ctx.currentTime + 3);
+      this._musicGain.gain.linearRampToValueAtTime(this._masterVolume, this._ctx.currentTime + 3);
       this._musicNext = this._ctx.currentTime + 0.1;
       this._musicLoop();
     });
@@ -126,6 +127,13 @@ export class Audio {
 
   toggleMusic() {
     this._musicOn ? this.stopMusic() : this.startMusic();
+  }
+
+  setVolume(v) {
+    this._masterVolume = Math.max(0, Math.min(1, v));
+    if (this._musicGain && this._musicOn) {
+      this._musicGain.gain.setTargetAtTime(this._masterVolume, this._ctx.currentTime, 0.05);
+    }
   }
 
   _musicNote(freq, start, dur, vol, type = 'triangle') {

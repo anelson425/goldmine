@@ -12,4 +12,14 @@ const loop = new GameLoop(game);
 // Expose input for touch controls defined in index.html
 window._gameInput = game.input;
 
+// Volume slider
+window.addEventListener('load', () => {
+  const slider = document.getElementById('vol-slider');
+  if (slider) {
+    slider.addEventListener('input', () => {
+      game.audio.setVolume(parseFloat(slider.value));
+    });
+  }
+});
+
 loop.start();
