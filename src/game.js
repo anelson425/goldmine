@@ -346,6 +346,12 @@ export class Game {
         this.renderer.drawWorld(this.world, this.camera, 0.016);
         this.renderer.drawEntities(this.entities, this.camera);
         this.renderer.drawPlayer(this.player, this.camera);
+        // Red damage flash — fades over iFrames duration
+        if (this.player.iFrames > 0) {
+          const alpha = (this.player.iFrames / 0.5) * 0.35;
+          this.ctx.fillStyle = `rgba(220, 30, 30, ${alpha})`;
+          this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
         this.particles.draw(ctx, this.camera);
         const depth = Math.max(0, this.player.row - 2);
         drawHUD(ctx, this.player, this.scoring, depth);
