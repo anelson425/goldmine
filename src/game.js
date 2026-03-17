@@ -76,6 +76,7 @@ export class Game {
 
     // Clear player starting tile so they don't begin inside a block
     this.world.setTile(15, 3, TILE.EMPTY);
+
   }
 
   _openShop() {
