@@ -73,13 +73,6 @@ export class Game {
 
     // Clear player starting tile so they don't begin inside a block
     this.world.setTile(15, 3, TILE.EMPTY);
-
-    // TEST: guaranteed shopkeeper near spawn for UI testing — remove when done
-    const testShop = new Shopkeeper(18, 6);
-    for (let dr = 0; dr < 2; dr++)
-      for (let dc = 0; dc < 2; dc++)
-        this.world.setTile(testShop.col + dc, testShop.row + dr, TILE.EMPTY);
-    this.entities.push(testShop);
   }
 
   _openShop() {
@@ -357,10 +350,7 @@ export class Game {
     const depth = this.player.row;
     let npc = null;
 
-    // Guarantee a shopkeeper in the first 15 rows for testing
-    if (depth <= 15 && !this.entities.some(e => e.type === 'shopkeeper')) {
-      npc = new Shopkeeper(nearCol, nearRow + 2);
-    } else if (r < 0.45) {
+    if (r < 0.45) {
       npc = new MinerGhost(nearCol, nearRow + 2);
     } else if (r < 0.65 && depth >= 11) {
       npc = new Wizard(nearCol, nearRow + 3);
