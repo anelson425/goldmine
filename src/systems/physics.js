@@ -1,4 +1,4 @@
-import { TILE } from '../constants.js';
+import { TILE, WORLD_COLS } from '../constants.js';
 import { getTileDef } from '../world/tiles.js';
 
 /** Physics: handles sand/falling rock gravity and entity movement ticks. */
@@ -21,7 +21,7 @@ export class Physics {
     // Sand gravity tick every 0.3s
     if (this._sandTimer >= 0.3) {
       this._sandTimer = 0;
-      newEntities.push(...this._tickSandGravity(player));
+      newEntities.push(...this._tickSandGravity(entities, player));
     }
 
     // Tick falling rocks
@@ -34,9 +34,21 @@ export class Physics {
     return newEntities;
   }
 
-  _tickSandGravity(player) {
+  _tickSandGravity(entities, player) {
     const world = this.world;
     const newEntities = [];
+
+    // Build set of entity-occupied tile positions so sand won't fall into them
+    const occupied = new Set();
+    occupied.add(`${player.col},${player.row}`);
+    for (const e of entities) {
+      occupied.add(`${e.col},${e.row}`);
+      if (e.type === 'shopkeeper') {
+        occupied.add(`${e.col + 1},${e.row}`);
+        occupied.add(`${e.col},${e.row + 1}`);
+        occupied.add(`${e.col + 1},${e.row + 1}`);
+      }
+    }
 
     // Scan all visible rows + buffer for sand tiles
     const scanStart = Math.max(0, player.row - 20);
@@ -44,11 +56,11 @@ export class Physics {
 
     // Scan bottom-up so falling sand doesn't get double-processed
     for (let row = scanEnd; row >= scanStart; row--) {
-      for (let col = 1; col < 30 - 1; col++) {
+      for (let col = 1; col < WORLD_COLS - 1; col++) {
         if (world.getTile(col, row) !== TILE.SAND) continue;
         const below = world.getTile(col, row + 1);
         const belowDef = getTileDef(below);
-        if (!belowDef.solid) {
+        if (!belowDef.solid && !occupied.has(`${col},${row + 1}`)) {
           // Sand falls
           world.setTile(col, row + 1, TILE.SAND);
           world.setTile(col, row,     TILE.EMPTY);

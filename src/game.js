@@ -71,9 +71,14 @@ export class Game {
     this.state     = STATE.PLAYING;
     this.audio.startMusic();
 
+    // Clear player starting tile so they don't begin inside a block
+    this.world.setTile(15, 3, TILE.EMPTY);
+
     // TEST: guaranteed shopkeeper near spawn for UI testing — remove when done
     const testShop = new Shopkeeper(18, 6);
-    this.world.setTile(testShop.col, testShop.row, TILE.EMPTY);
+    for (let dr = 0; dr < 2; dr++)
+      for (let dc = 0; dc < 2; dc++)
+        this.world.setTile(testShop.col + dc, testShop.row + dr, TILE.EMPTY);
     this.entities.push(testShop);
   }
 
@@ -321,6 +326,7 @@ export class Game {
     const col = 1 + Math.floor(Math.random() * 28);
     const row = player.row + 4 + Math.floor(Math.random() * 10);
     if (world.getTile(col, row) !== TILE.EMPTY) return;
+    if (this.entities.some(e => e.col === col && e.row === row)) return;
 
     let enemy;
     if (depth > 50) {
@@ -363,11 +369,28 @@ export class Game {
     }
 
     if (npc) {
+      const footprintCols = npc.type === 'shopkeeper' ? 2 : 1;
+      const footprintRows = npc.type === 'shopkeeper' ? 2 : 1;
+
+      // Ensure these rows are actually generated before writing tiles
+      this.world.ensureGenerated(npc.row + footprintRows + 1);
+
+      // Reject if another entity already occupies any part of the footprint
+      const overlaps = this.entities.some(e => {
+        const eCols = e.type === 'shopkeeper' ? 2 : 1;
+        const eRows = e.type === 'shopkeeper' ? 2 : 1;
+        for (let dr = 0; dr < footprintRows; dr++)
+          for (let dc = 0; dc < footprintCols; dc++)
+            for (let er = 0; er < eRows; er++)
+              for (let ec = 0; ec < eCols; ec++)
+                if (e.col + ec === npc.col + dc && e.row + er === npc.row + dr) return true;
+        return false;
+      });
+      if (overlaps) return;
+
       // Clear tile(s) — shopkeeper occupies 2×2
-      const cols = npc.type === 'shopkeeper' ? 2 : 1;
-      const rows = npc.type === 'shopkeeper' ? 2 : 1;
-      for (let dr = 0; dr < rows; dr++)
-        for (let dc = 0; dc < cols; dc++)
+      for (let dr = 0; dr < footprintRows; dr++)
+        for (let dc = 0; dc < footprintCols; dc++)
           this.world.setTile(npc.col + dc, npc.row + dr, TILE.EMPTY);
       this.entities.push(npc);
     }
