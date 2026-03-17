@@ -8,7 +8,44 @@
 </head>
 <body>
   <div id="wrapper">
-    <canvas id="game"></canvas>
+    <div id="game-row">
+
+      <!-- Left legend: Tiles -->
+      <div class="legend" id="left-legend">
+        <div class="legend-title">Tiles</div>
+        <div class="legend-entry"><span class="swatch" style="background:#4caf50"></span>Surface</div>
+        <div class="legend-entry"><span class="swatch" style="background:#8b5e3c"></span>Dirt</div>
+        <div class="legend-entry"><span class="swatch" style="background:#d4b483"></span>Sand ↓</div>
+        <div class="legend-entry"><span class="swatch" style="background:#7a7a8c"></span>Stone</div>
+        <div class="legend-entry"><span class="swatch" style="background:#b87333"></span>Copper +5g</div>
+        <div class="legend-entry"><span class="swatch" style="background:#ffd700"></span>Gold +10g</div>
+        <div class="legend-entry"><span class="swatch" style="background:#e63946"></span>Ruby +50g</div>
+        <div class="legend-entry"><span class="swatch" style="background:#2dc653"></span>Emerald +30g</div>
+        <div class="legend-entry"><span class="swatch" style="background:#a8e6f0"></span>Diamond +100g</div>
+        <div class="legend-entry"><span class="swatch" style="background:#1565c0"></span>Water -20hp</div>
+        <div class="legend-entry"><span class="swatch" style="background:#ff4500"></span>Lava ☠</div>
+      </div>
+
+      <canvas id="game"></canvas>
+
+      <!-- Right legend: NPCs -->
+      <div class="legend" id="right-legend">
+        <div class="legend-title">NPCs</div>
+        <div class="legend-entry">
+          <img class="npc-icon" src="assets/ghost.png" alt="Ghost" />
+          <span>Miner Ghost<br><em>hints nearby<br>wizard/shop</em></span>
+        </div>
+        <div class="legend-entry">
+          <img class="npc-icon" src="assets/wizard.png" alt="Wizard" />
+          <span>Wizard<br><em>grants a boon<br>press E</em></span>
+        </div>
+        <div class="legend-entry">
+          <img class="npc-icon" src="assets/secret_shop.png" alt="Shop" />
+          <span>Shopkeeper<br><em>rare items<br>press E</em></span>
+        </div>
+      </div>
+
+    </div>
 
     <!-- Volume control -->
     <div id="volume-row">
@@ -18,6 +55,7 @@
 
     <!-- Touch controls for mobile -->
     <div id="touch-controls">
+
       <div id="touch-row">
         <button class="touch-btn" id="btn-up">▲</button>
       </div>
