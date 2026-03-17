@@ -6,10 +6,10 @@ _img.onload = () => { _imgReady = true; };
 _img.src = 'assets/wizard.png';
 
 const BOONS = [
-  { label: 'Full HP restored!',     apply: (p) => { p.hp = p.maxHp; } },
-  { label: 'Oxygen refilled!',      apply: (p) => { p.refillOxygen(); } },
+  { label: 'Full HP & Oxygen!',      apply: (p) => { p.hp = p.maxHp; p.refillOxygen(); } },
+  { label: '+1 Max HP & Oxygen!',    apply: (p) => { p.maxHp++; p.maxOxygen += 10; p.hp = p.maxHp; p.oxygen = p.maxOxygen; } },
   { label: 'Ghost mode! (10s)',      apply: (p) => { p.ghostMode = 10; } },
-  { label: '+30 Gold bonus!',        apply: (p, s) => { s.addRunGold(30); } },
+  { label: '+1000 Gold!',            apply: (p, s) => { s.addRunGold(1000); } },
 ];
 
 export class Wizard {

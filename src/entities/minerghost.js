@@ -5,18 +5,6 @@ let _imgReady = false;
 _img.onload = () => { _imgReady = true; };
 _img.src = 'assets/ghost.png';
 
-const HINTS = [
-  'Gold veins run deeper below...',
-  'Beware the lava pools ahead!',
-  'A troll patrols 3 levels down.',
-  'Diamonds hide in the darkest stone.',
-  'Wizards dwell in the deep caves.',
-  'Ogres fear nothing. Run.',
-  'Copper leads to gold. Follow the vein.',
-  'The secret shop is close. Keep digging.',
-  'Sand falls — mind the ceiling!',
-  'Emeralds cluster in deep pockets.',
-];
 
 export class MinerGhost {
   constructor(col, row) {
@@ -26,15 +14,34 @@ export class MinerGhost {
     this.dead     = false;
     this.used     = false;
     this._phase   = 0;
-    this._hint    = HINTS[Math.floor(Math.random() * HINTS.length)];
+    this._hint    = null;
     this._showing = false;
     this._timer   = 0;
   }
 
-  interact(player, scoring, audio) {
+  interact(player, _scoring, audio, entities = []) {
     this._showing = true;
-    this._timer   = 4;
+    this._timer   = 5;
+    this._hint    = this._buildHint(player, entities);
     audio?.npc();
+  }
+
+  _buildHint(player, entities) {
+    const targets = entities.filter(e => e.type === 'wizard' || e.type === 'shopkeeper');
+    if (targets.length === 0) return 'I sense no wizards or secret shops nearby...';
+    const t = targets.reduce((closest, e) => {
+      const d = Math.abs(e.col - player.col) + Math.abs(e.row - player.row);
+      const cd = Math.abs(closest.col - player.col) + Math.abs(closest.row - player.row);
+      return d < cd ? e : closest;
+    });
+    const dc = t.col - player.col;
+    const dr = t.row - player.row;
+    const dist = Math.round(Math.sqrt(dc*dc + dr*dr));
+    const dir = Math.abs(dc) > Math.abs(dr)
+      ? (dc > 0 ? 'east' : 'west')
+      : (dr > 0 ? 'below' : 'above');
+    const label = t.type === 'wizard' ? 'a wizard' : 'the secret shop';
+    return `I sense ${label} ~${dist} tiles ${dir} of here.`;
   }
 
   update(delta) {
@@ -65,15 +72,6 @@ export class MinerGhost {
       ctx.fillRect(sx + 8,  sy - 4,  T - 16, 8);
     }
     ctx.restore();
-
-    // Interact hint
-    if (!this._showing) {
-      ctx.fillStyle = 'rgba(200,230,255,0.7)';
-      ctx.font      = '10px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText('[E] talk', sx + T/2, sy + T + 12);
-      ctx.textAlign = 'left';
-    }
 
     // Hint speech bubble
     if (this._showing) {

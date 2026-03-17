@@ -188,6 +188,14 @@ export class Game {
       if (typeof e.update === 'function') {
         e.update(delta, world, player, camera);
       }
+      // Ghost auto-triggers hint when player is adjacent
+      if (e.type === 'minerghost' && !e._showing) {
+        const dx = Math.abs(e.col - player.col);
+        const dy = Math.abs(e.row - player.row);
+        if (dx <= 1 && dy <= 1) {
+          e.interact(player, this.scoring, this.audio, this.entities);
+        }
+      }
     }
 
     // Physics
@@ -306,8 +314,8 @@ export class Game {
 
     this.entities.push(enemy);
 
-    // Spawn NPC rooms rarely in fresh chunks
-    if (row > this._lastSpawnRow + 15) {
+    // Spawn NPC rooms in fresh chunks
+    if (row > this._lastSpawnRow + 5) {
       this._lastSpawnRow = row;
       this._trySpawnNPC(col, row);
     }
@@ -318,11 +326,11 @@ export class Game {
     const depth = this.player.row;
     let npc = null;
 
-    if (r < 0.06) {
+    if (r < 0.45) {
       npc = new MinerGhost(nearCol, nearRow + 2);
-    } else if (r < 0.14 && depth >= 11) {
+    } else if (r < 0.65 && depth >= 11) {
       npc = new Wizard(nearCol, nearRow + 3);
-    } else if (r < 0.18 && depth >= 26) {
+    } else if (r < 0.72 && depth >= 26) {
       npc = new Shopkeeper(nearCol, nearRow + 2);
     }
 
@@ -342,7 +350,7 @@ export class Game {
       if (dx <= 1 && dy <= 1) {
         if (e.type === 'wizard')      e.interact(p, this.scoring, this.audio);
         if (e.type === 'shopkeeper')  e.interact(p, this.scoring, this.audio);
-        if (e.type === 'minerghost')  e.interact(p, this.scoring, this.audio);
+        if (e.type === 'minerghost')  e.interact(p, this.scoring, this.audio, this.entities);
         break;
       }
     }
