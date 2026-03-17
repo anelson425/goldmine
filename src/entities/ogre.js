@@ -1,6 +1,8 @@
 import { TILE_SIZE, ENEMY } from '../constants.js';
 
 const _img = new Image();
+let _imgReady = false;
+_img.onload = () => { _imgReady = true; };
 _img.src = 'assets/ogre.png';
 
 export class Ogre {
@@ -60,9 +62,9 @@ export class Ogre {
     // Windup flash
     const flash = this._windup > 0 && Math.sin(this._windup * 20) > 0;
 
-    if (_img.complete && _img.naturalWidth > 0) {
+    if (_imgReady) {
       ctx.save();
-      if (flash) { ctx.globalAlpha = 0.6; ctx.filter = 'hue-rotate(30deg)'; }
+      if (flash) ctx.globalAlpha = 0.5;
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(_img, sx, sy, T, T);
       ctx.restore();

@@ -1,6 +1,8 @@
 import { TILE_SIZE, ENEMY } from '../constants.js';
 
 const _img = new Image();
+let _imgReady = false;
+_img.onload = () => { _imgReady = true; };
 _img.src = 'assets/bat.png';
 
 export class Bat {
@@ -48,7 +50,7 @@ export class Bat {
     if (this.dead) return;
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.col * T, this.row * T);
-    if (_img.complete && _img.naturalWidth > 0) {
+    if (_imgReady) {
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(_img, sx, sy, T, T);
     } else {

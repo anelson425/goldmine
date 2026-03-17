@@ -9,6 +9,8 @@ export class Renderer {
     this.canvas = canvas;
     this.ctx    = canvas.getContext('2d');
     this._adventurer = new Image();
+    this._adventurerReady = false;
+    this._adventurer.onload = () => { this._adventurerReady = true; };
     this._adventurer.src = 'assets/adventurer.png';
   }
 
@@ -120,7 +122,7 @@ export class Renderer {
     ctx.save();
     if (player.ghostMode > 0) ctx.globalAlpha = 0.6;
 
-    if (this._adventurer.complete && this._adventurer.naturalWidth > 0) {
+    if (this._adventurerReady) {
       ctx.imageSmoothingEnabled = false;
       if (player.facing === 'left') {
         ctx.scale(-1, 1);

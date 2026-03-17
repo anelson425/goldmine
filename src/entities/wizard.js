@@ -1,6 +1,8 @@
 import { TILE_SIZE } from '../constants.js';
 
 const _img = new Image();
+let _imgReady = false;
+_img.onload = () => { _imgReady = true; };
 _img.src = 'assets/wizard.png';
 
 const BOONS = [
@@ -42,7 +44,7 @@ export class Wizard {
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.col * T, this.row * T);
 
-    if (_img.complete && _img.naturalWidth > 0) {
+    if (_imgReady) {
       ctx.save();
       if (this.used) ctx.globalAlpha = 0.45;
       ctx.imageSmoothingEnabled = false;
