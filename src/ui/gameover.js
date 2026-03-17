@@ -24,19 +24,19 @@ export function drawGameOver(ctx, scoring, phase) {
 
   // Stats
   const stats = [
-    { label: 'Gold Banked',  value: scoring.bankedGold },
-    { label: 'Run Gold Lost',value: 0 },   // already cleared by onDeath
-    { label: 'Total Score',  value: scoring.totalScore },
-    { label: 'High Score',   value: scoring.highScore },
+    { label: 'Gold Lost',   value: scoring.lostGold,   color: '#ef9a9a' },
+    { label: 'Gold Banked', value: scoring.bankedGold, color: '#fff' },
+    { label: 'Total Score', value: scoring.totalScore, color: '#fff' },
+    { label: 'High Score',  value: scoring.highScore,  color: '#ffd700' },
   ];
 
-  stats.forEach(({ label, value }, i) => {
+  stats.forEach(({ label, value, color }, i) => {
     const y = 270 + i * 42;
     ctx.font = '14px monospace';
     ctx.fillStyle = '#888';
     ctx.fillText(label, CANVAS_W / 2, y);
     ctx.font = 'bold 22px monospace';
-    ctx.fillStyle = label === 'High Score' ? '#ffd700' : '#fff';
+    ctx.fillStyle = color;
     ctx.fillText(value, CANVAS_W / 2, y + 22);
   });
 

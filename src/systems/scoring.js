@@ -5,6 +5,7 @@ export class Scoring {
     this.currentRunGold = 0;   // gold this descent (lost on death)
     this.bankedGold     = 0;   // gold safely surfaced (used for upgrades)
     this.totalScore     = 0;   // all-time cumulative (persisted)
+    this.lostGold       = 0;   // run gold lost on last death
     this._goldBankedThisRun = false;
 
     // Load persisted high score
@@ -37,6 +38,7 @@ export class Scoring {
 
   /** Called on player death. Run gold is lost. */
   onDeath() {
+    this.lostGold = this.currentRunGold;
     this.currentRunGold = 0;
     this._goldBankedThisRun = false;
   }
