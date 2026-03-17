@@ -9,14 +9,14 @@
 - [x] `src/loop.js` — `requestAnimationFrame` game loop with delta time (capped at 0.1s)
 - [x] `src/input.js` — keyboard (WASD/arrows) + touch input queue
 - [x] `src/systems/camera.js` — viewport follow, world→screen coords, screen shake
-- [x] `src/systems/renderer.js` — canvas draw (color-rect fallback mode): tiles, entities, player, HUD
+- [x] `src/systems/renderer.js` — canvas draw: tiles, entities, player, HUD
 - [x] `src/main.js` — wires game + loop, exposes input for touch buttons
 
 ### Phase 2 — World & Digging
 - [x] `src/world/tiles.js` — tile definitions (id, hp, reward, color, hazard flags)
 - [x] `src/world/world.js` — 2D tile grid, chunk management, dig damage, tile HP tracking
 - [x] `src/world/generator.js` — chunked procedural generation (4 zones, ore clusters, cellular automata smoothing, guaranteed passage)
-- [x] `src/entities/player.js` — movement, digging, HP, oxygen, pickaxe levels, special items
+- [x] `src/entities/player.js` — movement, digging, HP, oxygen, pickaxe levels, special items, bump-to-attack, facing direction
 - [x] `src/systems/scoring.js` — run gold, banked gold, localStorage high score
 
 ### Phase 3 — Hazards & Basic Enemies
@@ -25,16 +25,16 @@
 - [x] `src/entities/fallingrock.js` — falls when tile below is empty, damages player
 - [x] `src/entities/bat.js` — wanders ±2 tiles, damages on contact
 - [x] `src/systems/particles.js` — dig sparks, gold sparkle, hit effect
-- [x] `src/systems/audio.js` — synthesised Web Audio API sound effects (no files needed)
+- [x] `src/systems/audio.js` — Web Audio API SFX + background music (A-minor pentatonic, 78 BPM)
 - [x] `src/ui/gameover.js` — death screen with score summary
 
 ### Phase 4 — Advanced Enemies & NPCs
 - [x] `src/entities/goblin.js` — chases player within 4 tiles, drops gold
 - [x] `src/entities/troll.js` — slow patrol AI, drops gold
 - [x] `src/entities/ogre.js` — near-stationary, telegraphed shockwave attack, drops gold
-- [x] `src/entities/wizard.js` — friendly NPC, grants random boon on interact (E)
+- [x] `src/entities/wizard.js` — friendly NPC, grants random boon on interact (E): full HP+oxygen, +1 max HP/oxygen, ghost mode, +1000 gold
 - [x] `src/entities/shopkeeper.js` — friendly NPC, rare item shop (bomb, rope, lantern, heal)
-- [x] `src/entities/minerghost.js` — friendly NPC, gives hint about current chunk
+- [x] `src/entities/minerghost.js` — friendly NPC, auto-reveals nearest wizard/secret shop direction on proximity
 
 ### Phase 5 — Full Game Loop
 - [x] `src/game.js` — state machine: MENU → PLAYING → SHOP → GAME_OVER
@@ -47,33 +47,38 @@
 - [x] `tests/smoke.js` — 29 passing Node.js sanity checks (no framework)
 - [x] `README.md` — full game documentation
 
+### Phase 6 — Polish & Sprites
+- [x] `assets/` — pixel art sprites: adventurer, bat, goblin, ogre, wizard, ghost, minion, fire golem, secret shop
+- [x] Player sprite renders from `assets/adventurer.png`, flips left/right based on facing direction
+- [x] All entities render from PNG sprites with color-rect fallback (onload flag pattern)
+- [x] Lava animated with pulsing yellow glow overlay; gem tiles have rotated diamond shape + sparkle
+- [x] Volume slider in UI; DynamicsCompressor + makeup gain for speaker loudness
+- [x] Background music: A-minor pentatonic melody + bass, 78 BPM, M key toggle
+- [x] Ghost NPC spawns frequently, auto-triggers directional hint to nearest wizard/shop on proximity
+- [x] Wizard boons upgraded: full HP+oxygen restore, +1 max HP/oxygen, ghost mode, +1000 gold
+- [x] `.gitignore` for Windows, macOS, Node.js, and IDE files
+- [x] Custom domain: `playgoldmine.com` (GitHub Pages CNAME)
+
 ---
 
-## Todo — Phase 6: Polish & New Content
+## Todo — Phase 7: New Content & Features
 
-### Art & Animation
-- [ ] Draw pixel art sprite sheet (`assets/sprites.png`) — tiles + player frames (use Piskel: piskelapp.com)
-- [ ] Switch `src/systems/renderer.js` from color-rect mode to sprite-sheet mode
-- [ ] Add player walk/dig/idle animation frames driven by player state
-- [ ] Add enemy animations: bat flap, goblin run, troll stomp, ogre shockwave windup
-- [ ] Add NPC animations: wizard float/sparkle, shopkeeper idle, ghost flicker
+### NPCs & Enemies
+- [ ] Add minions purchasable from secret shop: follow player, absorb damage first, boost attack slightly, start with half player HP
+- [ ] Add Fire Golem boss (4×4 tiles) at deepest zone — defeating it wins the game
+- [ ] Fix secret shop purchase selection to work like the regular shop UI
+
+### Art
+- [ ] Add new pixel art graphics for all tiles (dirt, stone, sand, ore, lava, water, etc.)
+
+### World
+- [ ] Make the visible world bigger (increase viewport/canvas size)
 
 ### Audio
-- [ ] Replace synthesised beeps with real `.wav` sound effects (dig, gold, hurt, death, buy) — source from freesound.org
-- [ ] Add optional looping background music (`.mp3`) with M key mute toggle
+- [ ] Fix overall volume level through speakers (currently requires high makeup gain)
 
-### New Content
-- [ ] Add tile variants: mossy stone, cracked stone
-- [ ] Add treasure chest tile/entity: rare spawn, opens on dig, drops 50–150 gold
-- [ ] Add Rock Golem boss enemy: deep Zone 4 only, high HP, area stomp attack, drops 200 gold
-- [ ] Add rising lava hazard in Zone 4: lava level slowly creeps upward to pressure the player
-
-### Polish & Feel
+### Polish
 - [ ] Add zone transition milestone messages (e.g. "Entering the Deep Mine..." at row 26)
-- [ ] Add multi-line NPC dialogue with typewriter effect for all NPC interactions
 - [ ] Add red screen flash overlay on player damage
-- [ ] Add mobile haptic feedback (`navigator.vibrate`) on hit and dig events
-
-### Persistence & UI
-- [ ] Save/load player upgrades (pickaxe level, max HP, max oxygen) in `localStorage` across sessions
+- [ ] Save/load player upgrades in `localStorage` across sessions
 - [ ] Add top-5 high score leaderboard screen accessible from the main menu
