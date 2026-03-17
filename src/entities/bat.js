@@ -1,5 +1,8 @@
 import { TILE_SIZE, ENEMY } from '../constants.js';
 
+const _img = new Image();
+_img.src = 'assets/bat.png';
+
 export class Bat {
   constructor(col, row) {
     this.col    = col;
@@ -45,16 +48,18 @@ export class Bat {
     if (this.dead) return;
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.col * T, this.row * T);
-    ctx.fillStyle = '#6a0dad';
-    // Wings
-    ctx.fillRect(sx + 2,  sy + 10, 14, 8);
-    ctx.fillRect(sx + T-16, sy + 10, 14, 8);
-    // Body
-    ctx.fillStyle = '#3d0070';
-    ctx.fillRect(sx + 12, sy + 8, 16, 14);
-    // Eyes
-    ctx.fillStyle = '#ff0';
-    ctx.fillRect(sx + 14, sy + 12, 4, 4);
-    ctx.fillRect(sx + 22, sy + 12, 4, 4);
+    if (_img.complete && _img.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(_img, sx, sy, T, T);
+    } else {
+      ctx.fillStyle = '#6a0dad';
+      ctx.fillRect(sx + 2,  sy + 10, 14, 8);
+      ctx.fillRect(sx + T-16, sy + 10, 14, 8);
+      ctx.fillStyle = '#3d0070';
+      ctx.fillRect(sx + 12, sy + 8, 16, 14);
+      ctx.fillStyle = '#ff0';
+      ctx.fillRect(sx + 14, sy + 12, 4, 4);
+      ctx.fillRect(sx + 22, sy + 12, 4, 4);
+    }
   }
 }

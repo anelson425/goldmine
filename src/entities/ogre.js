@@ -1,5 +1,8 @@
 import { TILE_SIZE, ENEMY } from '../constants.js';
 
+const _img = new Image();
+_img.src = 'assets/ogre.png';
+
 export class Ogre {
   constructor(col, row) {
     this.col        = col;
@@ -57,15 +60,21 @@ export class Ogre {
     // Windup flash
     const flash = this._windup > 0 && Math.sin(this._windup * 20) > 0;
 
-    ctx.fillStyle = flash ? '#ff5722' : '#5d4037';
-    ctx.fillRect(sx + 2, sy + 2, T - 4, T - 4);   // body
-
-    ctx.fillStyle = '#4e342e';
-    ctx.fillRect(sx + 6, sy - 2, T - 12, 10);      // head
-
-    ctx.fillStyle = '#ff6f00';
-    ctx.fillRect(sx + 8,  sy,    6, 6);             // eyes
-    ctx.fillRect(sx + 22, sy,    6, 6);
+    if (_img.complete && _img.naturalWidth > 0) {
+      ctx.save();
+      if (flash) { ctx.globalAlpha = 0.6; ctx.filter = 'hue-rotate(30deg)'; }
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(_img, sx, sy, T, T);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = flash ? '#ff5722' : '#5d4037';
+      ctx.fillRect(sx + 2, sy + 2, T - 4, T - 4);
+      ctx.fillStyle = '#4e342e';
+      ctx.fillRect(sx + 6, sy - 2, T - 12, 10);
+      ctx.fillStyle = '#ff6f00';
+      ctx.fillRect(sx + 8,  sy,    6, 6);
+      ctx.fillRect(sx + 22, sy,    6, 6);
+    }
 
     // Shockwave ring during windup
     if (this._windup > 0) {

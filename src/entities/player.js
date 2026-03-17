@@ -34,6 +34,9 @@ export class Player {
     // Move cooldown
     this._moveCooldown = 0;      // ms remaining
 
+    // Facing direction for sprite flip
+    this.facing = 'right';
+
     // Inventory (special items from NPCs)
     this.hasBomb     = false;
     this.hasRope     = false;
@@ -54,9 +57,9 @@ export class Player {
   /** Called by the input system. direction: 'up'|'down'|'left'|'right' */
   tryMove(dir, deltaMs, entities = []) {
     if (!this.alive) return;
+    if (dir === 'left' || dir === 'right') this.facing = dir;
     this._moveCooldown -= deltaMs;
     if (this._moveCooldown > 0) return;
-
     const deltas = { up: [0,-1], down: [0,1], left: [-1,0], right: [1,0] };
     const [dc, dr] = deltas[dir];
     const tc = this.col + dc;

@@ -1,5 +1,8 @@
 import { TILE_SIZE, ENEMY, TILE } from '../constants.js';
 
+const _img = new Image();
+_img.src = 'assets/goblin.png';
+
 export class Goblin {
   constructor(col, row) {
     this.col    = col;
@@ -55,16 +58,19 @@ export class Goblin {
     if (this.dead) return;
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.col * T, this.row * T);
-    ctx.fillStyle = '#4caf50';
-    ctx.fillRect(sx + 8, sy + 6, T - 16, T - 10);
-    // Head
-    ctx.fillStyle = '#388e3c';
-    ctx.fillRect(sx + 10, sy + 2, T - 20, 10);
-    // Eyes
-    ctx.fillStyle = '#ffeb3b';
-    ctx.fillRect(sx + 12, sy + 4, 4, 4);
-    ctx.fillRect(sx + 22, sy + 4, 4, 4);
-    // HP bar
+    if (_img.complete && _img.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(_img, sx, sy, T, T);
+    } else {
+      ctx.fillStyle = '#4caf50';
+      ctx.fillRect(sx + 8, sy + 6, T - 16, T - 10);
+      ctx.fillStyle = '#388e3c';
+      ctx.fillRect(sx + 10, sy + 2, T - 20, 10);
+      ctx.fillStyle = '#ffeb3b';
+      ctx.fillRect(sx + 12, sy + 4, 4, 4);
+      ctx.fillRect(sx + 22, sy + 4, 4, 4);
+    }
+    // HP bar always drawn on top
     this._drawHpBar(ctx, sx, sy, T);
   }
 

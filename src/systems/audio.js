@@ -20,10 +20,10 @@ const MELODY = [
 
 // Bass: sustained low notes (freq in Hz, beat offset, duration in beats)
 const BASS = [
-  {f:55,    b:0,  d:3.5},
-  {f:55,    b:4,  d:3.5},
-  {f:65.41, b:8,  d:3.5},
-  {f:55,    b:12, d:4.5},
+  {f:110,   b:0,  d:3.5},
+  {f:110,   b:4,  d:3.5},
+  {f:130.82,b:8,  d:3.5},
+  {f:110,   b:12, d:4.5},
 ];
 
 const LOOP_BEATS = 18; // total pattern length before repeat
@@ -32,11 +32,23 @@ export class Audio {
   constructor() {
     try {
       this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+      // Master compressor — increases perceived loudness on speakers
+      this._compressor = this._ctx.createDynamicsCompressor();
+      this._compressor.threshold.value = -18;
+      this._compressor.knee.value      = 8;
+      this._compressor.ratio.value     = 4;
+      this._compressor.attack.value    = 0.003;
+      this._compressor.release.value   = 0.25;
+      this._makeupGain = this._ctx.createGain();
+      this._makeupGain.gain.value = 2.6;
+      this._compressor.connect(this._makeupGain);
+      this._makeupGain.connect(this._ctx.destination);
     } catch {
-      this._ctx = null;
+      this._ctx        = null;
+      this._compressor = null;
     }
     this.muted         = false;
-    this._masterVolume = 0.75;
+    this._masterVolume = 1.0;
     this._musicOn      = false;
     this._musicGain    = null;
     this._musicNext    = 0;
@@ -50,13 +62,15 @@ export class Audio {
     return Promise.resolve();
   }
 
+  _out() { return this._compressor ?? this._ctx.destination; }
+
   _beep({ freq = 440, type = 'square', duration = 0.08, volume = 0.15, decay = 0.08 } = {}) {
     if (this.muted || !this._ctx) return;
     this._resume();
     const osc  = this._ctx.createOscillator();
     const gain = this._ctx.createGain();
     osc.connect(gain);
-    gain.connect(this._ctx.destination);
+    gain.connect(this._out());
     osc.type      = type;
     osc.frequency.setValueAtTime(freq, this._ctx.currentTime);
     gain.gain.setValueAtTime(volume, this._ctx.currentTime);
@@ -69,7 +83,6 @@ export class Audio {
     if (this.muted || !this._ctx) return;
     this._resume();
     const ctx = this._ctx;
-    // Short white-noise burst through a bandpass — sounds like a dull earth impact
     const len    = Math.floor(ctx.sampleRate * 0.04);
     const buf    = ctx.createBuffer(1, len, ctx.sampleRate);
     const data   = buf.getChannelData(0);
@@ -85,7 +98,7 @@ export class Audio {
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
     src.connect(filter);
     filter.connect(gain);
-    gain.connect(ctx.destination);
+    gain.connect(this._out());
     src.start();
     src.stop(ctx.currentTime + 0.08);
   }
@@ -107,7 +120,7 @@ export class Audio {
     this._musicOn   = true;
     this._musicGain = this._ctx.createGain();
     this._musicGain.gain.setValueAtTime(0, this._ctx.currentTime);
-    this._musicGain.connect(this._ctx.destination);
+    this._musicGain.connect(this._out());
     this._resume().then(() => {
       if (!this._musicOn) return;
       this._musicGain.gain.linearRampToValueAtTime(this._masterVolume, this._ctx.currentTime + 3);
@@ -160,10 +173,10 @@ export class Audio {
     const t0  = this._musicNext;
 
     for (const { i, b, d } of MELODY) {
-      this._musicNote(SCALE[i], t0 + b * B, d * B, 0.048, 'triangle');
+      this._musicNote(SCALE[i], t0 + b * B, d * B, 0.08, 'triangle');
     }
     for (const { f, b, d } of BASS) {
-      this._musicNote(f, t0 + b * B, d * B, 0.065, 'sine');
+      this._musicNote(f, t0 + b * B, d * B, 0.1, 'sine');
     }
 
     this._musicNext = t0 + LOOP_BEATS * B;

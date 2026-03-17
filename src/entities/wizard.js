@@ -1,5 +1,8 @@
 import { TILE_SIZE } from '../constants.js';
 
+const _img = new Image();
+_img.src = 'assets/wizard.png';
+
 const BOONS = [
   { label: 'Full HP restored!',     apply: (p) => { p.hp = p.maxHp; } },
   { label: 'Oxygen refilled!',      apply: (p) => { p.refillOxygen(); } },
@@ -39,26 +42,30 @@ export class Wizard {
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.col * T, this.row * T);
 
-    // Robe
-    ctx.fillStyle = this.used ? '#555' : '#7c4dff';
-    ctx.fillRect(sx + 8, sy + 10, T - 16, T - 12);
-    // Hat
-    ctx.fillStyle = this.used ? '#444' : '#4527a0';
-    ctx.beginPath();
-    ctx.moveTo(sx + T/2, sy);
-    ctx.lineTo(sx + 8,   sy + 14);
-    ctx.lineTo(sx + T-8, sy + 14);
-    ctx.closePath();
-    ctx.fill();
-    // Face
-    ctx.fillStyle = '#ffe0b2';
-    ctx.fillRect(sx + 12, sy + 10, T - 24, 10);
-    // Stars (animated)
-    if (!this.used) {
-      ctx.fillStyle = '#ffe57f';
-      const s = Math.sin(this._phase * 3);
-      ctx.fillRect(sx + 4 + s*2, sy + 4, 5, 5);
-      ctx.fillRect(sx + T-10 - s*2, sy + 16, 4, 4);
+    if (_img.complete && _img.naturalWidth > 0) {
+      ctx.save();
+      if (this.used) ctx.globalAlpha = 0.45;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(_img, sx, sy, T, T);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = this.used ? '#555' : '#7c4dff';
+      ctx.fillRect(sx + 8, sy + 10, T - 16, T - 12);
+      ctx.fillStyle = this.used ? '#444' : '#4527a0';
+      ctx.beginPath();
+      ctx.moveTo(sx + T/2, sy);
+      ctx.lineTo(sx + 8,   sy + 14);
+      ctx.lineTo(sx + T-8, sy + 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#ffe0b2';
+      ctx.fillRect(sx + 12, sy + 10, T - 24, 10);
+      if (!this.used) {
+        ctx.fillStyle = '#ffe57f';
+        const s = Math.sin(this._phase * 3);
+        ctx.fillRect(sx + 4 + s*2, sy + 4, 5, 5);
+        ctx.fillRect(sx + T-10 - s*2, sy + 16, 4, 4);
+      }
     }
 
     // Message bubble

@@ -8,6 +8,8 @@ export class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx    = canvas.getContext('2d');
+    this._adventurer = new Image();
+    this._adventurer.src = 'assets/adventurer.png';
   }
 
   clear() {
@@ -115,20 +117,26 @@ export class Renderer {
     const T   = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(player.px, player.py);
 
-    // Body
-    ctx.fillStyle = player.ghostMode > 0 ? 'rgba(180,180,255,0.6)' : '#f5c518';
-    ctx.fillRect(sx + 4, sy + 4, T - 8, T - 8);
+    ctx.save();
+    if (player.ghostMode > 0) ctx.globalAlpha = 0.6;
 
-    // Hard hat
-    ctx.fillStyle = '#e53935';
-    ctx.fillRect(sx + 6, sy + 2, T - 12, 8);
+    if (this._adventurer.complete && this._adventurer.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      if (player.facing === 'left') {
+        ctx.scale(-1, 1);
+        ctx.drawImage(this._adventurer, -sx - T, sy, T, T);
+      } else {
+        ctx.drawImage(this._adventurer, sx, sy, T, T);
+      }
+    } else {
+      // Fallback color rect until image loads
+      ctx.fillStyle = player.ghostMode > 0 ? 'rgba(180,180,255,0.6)' : '#f5c518';
+      ctx.fillRect(sx + 4, sy + 4, T - 8, T - 8);
+    }
 
-    // Eyes
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(sx + 10, sy + 12, 4, 4);
-    ctx.fillRect(sx + 22, sy + 12, 4, 4);
+    ctx.restore();
 
-    // Pickaxe indicator (level pip)
+    // Pickaxe level pip
     ctx.fillStyle = ['#aaa', '#c0a020', '#00bcd4'][player.pickaxeLevel - 1];
     ctx.fillRect(sx + T - 10, sy + T - 10, 6, 6);
   }

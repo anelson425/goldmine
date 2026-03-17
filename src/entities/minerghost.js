@@ -1,5 +1,8 @@
 import { TILE_SIZE } from '../constants.js';
 
+const _img = new Image();
+_img.src = 'assets/ghost.png';
+
 const HINTS = [
   'Gold veins run deeper below...',
   'Beware the lava pools ahead!',
@@ -47,16 +50,19 @@ export class MinerGhost {
 
     const alpha = 0.5 + Math.sin(this._phase * 2) * 0.2;
 
+    ctx.save();
     ctx.globalAlpha = alpha;
-    // Ghost body (semi-transparent white)
-    ctx.fillStyle = '#e0e0e0';
-    ctx.fillRect(sx + 8,  sy + 4,  T - 16, T - 10);
-    // Head
-    ctx.fillRect(sx + 10, sy,      T - 20, 10);
-    // Miner hat
-    ctx.fillStyle = '#9e9e9e';
-    ctx.fillRect(sx + 8,  sy - 4,  T - 16, 8);
-    ctx.globalAlpha = 1;
+    if (_img.complete && _img.naturalWidth > 0) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(_img, sx, sy, T, T);
+    } else {
+      ctx.fillStyle = '#e0e0e0';
+      ctx.fillRect(sx + 8,  sy + 4,  T - 16, T - 10);
+      ctx.fillRect(sx + 10, sy,      T - 20, 10);
+      ctx.fillStyle = '#9e9e9e';
+      ctx.fillRect(sx + 8,  sy - 4,  T - 16, 8);
+    }
+    ctx.restore();
 
     // Interact hint
     if (!this._showing) {
