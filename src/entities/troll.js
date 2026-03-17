@@ -1,5 +1,10 @@
 import { TILE_SIZE, ENEMY, TILE } from '../constants.js';
 
+const _img = new Image();
+let _imgReady = false;
+_img.onload = () => { _imgReady = true; };
+_img.src = 'assets/troll.png';
+
 export class Troll {
   constructor(col, row) {
     this.col       = col;
@@ -45,16 +50,23 @@ export class Troll {
     if (this.dead) return;
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.col * T, this.row * T);
-    // Large body
-    ctx.fillStyle = '#795548';
-    ctx.fillRect(sx + 4, sy + 4, T - 8, T - 6);
-    // Head
-    ctx.fillStyle = '#6d4c41';
-    ctx.fillRect(sx + 8, sy, T - 16, 12);
-    // Eyes
-    ctx.fillStyle = '#f44336';
-    ctx.fillRect(sx + 10, sy + 2, 5, 5);
-    ctx.fillRect(sx + 22, sy + 2, 5, 5);
+
+    if (_imgReady) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(_img, sx, sy, T, T);
+    } else {
+      // Large body
+      ctx.fillStyle = '#795548';
+      ctx.fillRect(sx + 4, sy + 4, T - 8, T - 6);
+      // Head
+      ctx.fillStyle = '#6d4c41';
+      ctx.fillRect(sx + 8, sy, T - 16, 12);
+      // Eyes
+      ctx.fillStyle = '#f44336';
+      ctx.fillRect(sx + 10, sy + 2, 5, 5);
+      ctx.fillRect(sx + 22, sy + 2, 5, 5);
+    }
+
     // HP bar
     const pct = this.hp / this.maxHp;
     ctx.fillStyle = '#333';
