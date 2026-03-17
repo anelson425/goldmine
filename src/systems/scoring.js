@@ -48,6 +48,15 @@ export class Scoring {
     return true;
   }
 
+  /** Spend from run gold first, then banked gold. Used by secret shop. */
+  spendAny(amount) {
+    if (this.currentRunGold + this.bankedGold < amount) return false;
+    const fromRun = Math.min(this.currentRunGold, amount);
+    this.currentRunGold -= fromRun;
+    this.bankedGold -= (amount - fromRun);
+    return true;
+  }
+
   /** Display-ready gold total for HUD. */
   get displayGold() {
     return this.bankedGold + this.currentRunGold;

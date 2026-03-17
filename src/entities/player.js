@@ -40,7 +40,6 @@ export class Player {
     // Inventory (special items from NPCs)
     this.hasBomb     = false;
     this.hasRope     = false;
-    this.hasLantern  = false;
     this.ghostMode   = 0;        // seconds remaining
     this.iFrames     = 0;        // seconds of invincibility remaining after a hit
 
@@ -128,8 +127,8 @@ export class Player {
   useBomb() {
     if (!this.hasBomb) return;
     this.hasBomb = false;
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
+    for (let dr = -2; dr <= 2; dr++) {
+      for (let dc = -2; dc <= 2; dc++) {
         const { reward } = this.world.digTile(this.col + dc, this.row + dr, 99);
         this.scoring.addRunGold(reward);
       }

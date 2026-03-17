@@ -24,6 +24,7 @@ export class Input {
       ArrowRight: 'right', d: 'right', D: 'right',
       e: 'interact', E: 'interact', Enter: 'interact',
       b: 'bomb',     B: 'bomb',
+      r: 'rope',     R: 'rope',
       c: 'rope',     C: 'rope',
       m: 'music',    M: 'music',
     };

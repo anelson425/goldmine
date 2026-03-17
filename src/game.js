@@ -5,7 +5,8 @@ import { Bat }         from './entities/bat.js';
 import { Goblin }      from './entities/goblin.js';
 import { Troll }       from './entities/troll.js';
 import { Ogre }        from './entities/ogre.js';
-import { FallingRock } from './entities/fallingrock.js';
+// FallingRock is spawned by physics system directly
+// import { FallingRock } from './entities/fallingrock.js';
 import { Wizard }      from './entities/wizard.js';
 import { Shopkeeper }  from './entities/shopkeeper.js';
 import { MinerGhost }  from './entities/minerghost.js';
@@ -21,7 +22,7 @@ import { drawMenu }    from './ui/menu.js';
 import { ShopUI }      from './ui/shop.js';
 import { drawGameOver }from './ui/gameover.js';
 
-const STATE = { MENU: 'MENU', PLAYING: 'PLAYING', SHOP: 'SHOP', GAME_OVER: 'GAME_OVER' };
+const STATE = { MENU: 'MENU', PLAYING: 'PLAYING', SHOP: 'SHOP', SECRET_SHOP: 'SECRET_SHOP', GAME_OVER: 'GAME_OVER' };
 
 export class Game {
   constructor(canvas) {
@@ -38,6 +39,7 @@ export class Game {
     this._phase   = 0;   // generic timer for animations
     this._shopMsg = '';
     this._shopMsgTimer = 0;
+    this._activeShopkeeper = null;
 
     // These are initialised when PLAYING starts
     this.world    = null;
@@ -68,6 +70,11 @@ export class Game {
     this._wentUnderground = false;  // shop can't trigger until player digs down
     this.state     = STATE.PLAYING;
     this.audio.startMusic();
+
+    // TEST: guaranteed shopkeeper near spawn for UI testing — remove when done
+    const testShop = new Shopkeeper(18, 6);
+    this.world.setTile(testShop.col, testShop.row, TILE.EMPTY);
+    this.entities.push(testShop);
   }
 
   _openShop() {
@@ -97,14 +104,15 @@ export class Game {
     if (mi !== -1) { this.input.queue.splice(mi, 1); this.audio.toggleMusic(); }
 
     switch (this.state) {
-      case STATE.MENU:      this._updateMenu(delta);     break;
-      case STATE.PLAYING:   this._updatePlaying(delta);  break;
-      case STATE.SHOP:      this._updateShop(delta);     break;
-      case STATE.GAME_OVER: this._updateGameOver(delta); break;
+      case STATE.MENU:         this._updateMenu(delta);        break;
+      case STATE.PLAYING:      this._updatePlaying(delta);     break;
+      case STATE.SHOP:         this._updateShop(delta);        break;
+      case STATE.SECRET_SHOP:  this._updateSecretShop(delta);  break;
+      case STATE.GAME_OVER:    this._updateGameOver(delta);    break;
     }
   }
 
-  _updateMenu(delta) {
+  _updateMenu(_delta) {
     let action;
     while ((action = this.input.consume())) {
       if (action === 'interact' || action === 'bomb') {
@@ -233,12 +241,6 @@ export class Game {
     camera.update(delta);
     particles.update(delta);
 
-    // Shop keeper navigation while open
-    for (const e of this.entities) {
-      if (e.type === 'shopkeeper' && e.open) {
-        // handled in interact
-      }
-    }
   }
 
   _updateShop(delta) {
@@ -267,7 +269,30 @@ export class Game {
     }
   }
 
-  _updateGameOver(delta) {
+  _updateSecretShop(_delta) {
+    if (!this._activeShopkeeper) { this.state = STATE.PLAYING; return; }
+    if (this._shopMsgTimer > 0) this._shopMsgTimer = Math.max(0, this._shopMsgTimer - _delta);
+    const sk = this._activeShopkeeper;
+    let action;
+    while ((action = this.input.consume())) {
+      if (action === 'up')   sk.navUp();
+      if (action === 'down') sk.navDown();
+      if (action === 'interact' || action === 'bomb') {
+        if (sk.buy(this.player, this.scoring, this.audio) !== false) {
+          this._shopMsg      = sk._message || '';
+          this._shopMsgTimer = 2;
+        }
+      }
+      if (action === 'rope') {
+        this._activeShopkeeper = null;
+        this.input.flush();
+        this.state = STATE.PLAYING;
+        return;
+      }
+    }
+  }
+
+  _updateGameOver(_delta) {
     let action;
     while ((action = this.input.consume())) {
       if (action === 'interact' || action === 'bomb') {
@@ -326,7 +351,10 @@ export class Game {
     const depth = this.player.row;
     let npc = null;
 
-    if (r < 0.45) {
+    // Guarantee a shopkeeper in the first 15 rows for testing
+    if (depth <= 15 && !this.entities.some(e => e.type === 'shopkeeper')) {
+      npc = new Shopkeeper(nearCol, nearRow + 2);
+    } else if (r < 0.45) {
       npc = new MinerGhost(nearCol, nearRow + 2);
     } else if (r < 0.65 && depth >= 11) {
       npc = new Wizard(nearCol, nearRow + 3);
@@ -335,8 +363,12 @@ export class Game {
     }
 
     if (npc) {
-      // Clear the NPC's tile
-      this.world.setTile(npc.col, npc.row, TILE.EMPTY);
+      // Clear tile(s) — shopkeeper occupies 2×2
+      const cols = npc.type === 'shopkeeper' ? 2 : 1;
+      const rows = npc.type === 'shopkeeper' ? 2 : 1;
+      for (let dr = 0; dr < rows; dr++)
+        for (let dc = 0; dc < cols; dc++)
+          this.world.setTile(npc.col + dc, npc.row + dr, TILE.EMPTY);
       this.entities.push(npc);
     }
   }
@@ -349,7 +381,14 @@ export class Game {
       const dy = Math.abs(e.row - p.row);
       if (dx <= 1 && dy <= 1) {
         if (e.type === 'wizard')      e.interact(p, this.scoring, this.audio);
-        if (e.type === 'shopkeeper')  e.interact(p, this.scoring, this.audio);
+        if (e.type === 'shopkeeper') {
+          this._activeShopkeeper = e;
+          this._shopMsgTimer = 0;
+          this._shopMsg = '';
+          this.input.flush();
+          this.state = STATE.SECRET_SHOP;
+          this.audio.npc();
+        }
         if (e.type === 'minerghost')  e.interact(p, this.scoring, this.audio, this.entities);
         break;
       }
@@ -391,9 +430,79 @@ export class Game {
         this.shopUI.draw(ctx, this.scoring, this.player, this._shopMsgTimer > 0 ? this._shopMsg : '');
         break;
 
+      case STATE.SECRET_SHOP:
+        this.renderer.drawBackground(this.camera);
+        this.renderer.drawWorld(this.world, this.camera, 0);
+        this.renderer.drawEntities(this.entities, this.camera);
+        this.renderer.drawPlayer(this.player, this.camera);
+        if (this._activeShopkeeper) this._drawSecretShopUI(ctx);
+        break;
+
       case STATE.GAME_OVER:
         drawGameOver(ctx, this.scoring, this._phase);
         break;
     }
+  }
+
+  _drawSecretShopUI(ctx) {
+    const sk = this._activeShopkeeper;
+    ctx.fillStyle = 'rgba(10,8,4,0.93)';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    ctx.textAlign = 'center';
+
+    ctx.font = 'bold 32px monospace';
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText('SECRET SHOP', CANVAS_W / 2, 70);
+
+    ctx.font = '15px monospace';
+    ctx.fillStyle = '#aaa';
+    ctx.fillText('Rare items — one time only!', CANVAS_W / 2, 100);
+
+    ctx.font = 'bold 18px monospace';
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText(`Available Gold: ${this.scoring.displayGold}`, CANVAS_W / 2, 135);
+
+    if (sk.stock.length === 0) {
+      ctx.font = '16px monospace';
+      ctx.fillStyle = '#888';
+      ctx.fillText('Sold out!', CANVAS_W / 2, 200);
+    } else {
+      sk.stock.forEach((item, i) => {
+        const y       = 185 + i * 70;
+        const selected = i === sk.selectedIdx;
+        const canAfford = (this.scoring.bankedGold + this.scoring.runGold) >= item.cost;
+
+        ctx.fillStyle = selected ? 'rgba(255,215,0,0.12)' : 'rgba(255,255,255,0.04)';
+        ctx.fillRect(80, y - 26, CANVAS_W - 160, 58);
+
+        if (selected) {
+          ctx.strokeStyle = '#ffd700';
+          ctx.lineWidth   = 2;
+          ctx.strokeRect(80, y - 26, CANVAS_W - 160, 58);
+        }
+
+        ctx.font = 'bold 16px monospace';
+        ctx.fillStyle = selected ? '#ffe57f' : '#fff';
+        ctx.fillText(item.label, CANVAS_W / 2, y);
+
+        ctx.font = '13px monospace';
+        ctx.fillStyle = canAfford ? '#ffd700' : '#e53935';
+        ctx.fillText(`${item.cost} gold`, CANVAS_W / 2, y + 22);
+      });
+    }
+
+    ctx.font = '12px monospace';
+    ctx.fillStyle = '#666';
+    ctx.fillText('↑↓ select   Enter / E buy   C close', CANVAS_W / 2, CANVAS_H - 50);
+
+    const msg = this._shopMsgTimer > 0 ? this._shopMsg : (sk._msgTimer > 0 ? sk._message : '');
+    if (msg) {
+      ctx.font = 'bold 14px monospace';
+      ctx.fillStyle = '#ffe57f';
+      ctx.fillText(msg, CANVAS_W / 2, CANVAS_H - 28);
+    }
+
+    ctx.textAlign = 'left';
   }
 }

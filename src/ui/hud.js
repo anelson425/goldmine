@@ -73,7 +73,6 @@ export function drawHUD(ctx, player, scoring, depth) {
   ctx.font = '11px monospace';
   if (player.hasBomb)    { ctx.fillStyle = '#ff7043'; ctx.fillText('[B]Bomb',   itemX, itemY + 14); itemX += 60; }
   if (player.hasRope)    { ctx.fillStyle = '#a5d6a7'; ctx.fillText('[R]Rope',   itemX, itemY + 14); itemX += 60; }
-  if (player.hasLantern) { ctx.fillStyle = '#fff59d'; ctx.fillText('Lantern',   itemX, itemY + 14); itemX += 60; }
   if (player.ghostMode > 0) {
     ctx.fillStyle = '#ce93d8';
     ctx.fillText(`Ghost ${player.ghostMode.toFixed(0)}s`, itemX, itemY + 14);
