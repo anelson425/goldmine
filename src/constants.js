@@ -53,7 +53,8 @@ export const ENEMY = Object.freeze({
   BAT:    { hp: 1, damage: 10, speed: 0.8,  drop: 0  },
   GOBLIN: { hp: 2, damage: 15, speed: 1.2,  drop: 5  },
   TROLL:  { hp: 5, damage: 25, speed: 0.5,  drop: 20 },
-  OGRE:   { hp: 8, damage: 40, speed: 0.3,  drop: 50 },
+  OGRE:      { hp: 8,  damage: 40, speed: 0.3, drop: 50  },
+  FIRE_GOLEM: { hp: 40, damage: 50, speed: 0,   drop: 500 },
 });
 
 // ── NPC Spawn Rates (per chunk) ───────────────────────────────────────────────

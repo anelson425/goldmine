@@ -47,6 +47,10 @@ export class Physics {
         occupied.add(`${e.col + 1},${e.row}`);
         occupied.add(`${e.col},${e.row + 1}`);
         occupied.add(`${e.col + 1},${e.row + 1}`);
+      } else if (e.type === 'firegolem') {
+        for (let dr = 0; dr < 4; dr++)
+          for (let dc = 0; dc < 4; dc++)
+            occupied.add(`${e.col + dc},${e.row + dr}`);
       }
     }
 

@@ -68,9 +68,11 @@ export class Player {
     if (tc < 1 || tc >= WORLD_COLS - 1 || tr < 0) return;
 
     // Bump-attack: if an enemy occupies the target tile, attack it
-    const enemy = entities.find(
-      e => ['bat','goblin','troll','ogre'].includes(e.type) && e.col === tc && e.row === tr
-    );
+    const enemy = entities.find(e => {
+      if (!['bat','goblin','troll','ogre','firegolem'].includes(e.type)) return false;
+      if (e.type === 'firegolem') return e.occupiesTile(tc, tr);
+      return e.col === tc && e.row === tr;
+    });
     if (enemy) {
       enemy.takeDamage(this.pickaxeLevel);
       this.digTarget = null;

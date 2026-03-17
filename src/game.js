@@ -10,6 +10,7 @@ import { Ogre }        from './entities/ogre.js';
 import { Wizard }      from './entities/wizard.js';
 import { Shopkeeper }  from './entities/shopkeeper.js';
 import { MinerGhost }  from './entities/minerghost.js';
+import { FireGolem }   from './entities/firegolem.js';
 import { Input }       from './input.js';
 import { Scoring }     from './systems/scoring.js';
 import { Renderer }    from './systems/renderer.js';
@@ -21,8 +22,9 @@ import { drawHUD }     from './ui/hud.js';
 import { drawMenu }    from './ui/menu.js';
 import { ShopUI }      from './ui/shop.js';
 import { drawGameOver }from './ui/gameover.js';
+import { drawWin }     from './ui/win.js';
 
-const STATE = { MENU: 'MENU', PLAYING: 'PLAYING', SHOP: 'SHOP', SECRET_SHOP: 'SECRET_SHOP', GAME_OVER: 'GAME_OVER' };
+const STATE = { MENU: 'MENU', PLAYING: 'PLAYING', SHOP: 'SHOP', SECRET_SHOP: 'SECRET_SHOP', GAME_OVER: 'GAME_OVER', WIN: 'WIN' };
 
 export class Game {
   constructor(canvas) {
@@ -66,6 +68,7 @@ export class Game {
     this.entities  = [];
     this._lastSpawnRow  = 0;
     this._spawnCooldown = 0;
+    this._bossSpawned   = false;
     this.player    = new Player(this.world, this.scoring);
     this._wentUnderground = false;  // shop can't trigger until player digs down
     this.state     = STATE.PLAYING;
@@ -107,6 +110,7 @@ export class Game {
       case STATE.SHOP:         this._updateShop(delta);        break;
       case STATE.SECRET_SHOP:  this._updateSecretShop(delta);  break;
       case STATE.GAME_OVER:    this._updateGameOver(delta);    break;
+      case STATE.WIN:          this._updateWin(delta);         break;
     }
   }
 
@@ -207,7 +211,7 @@ export class Game {
     // Physics
     this.physics.update(delta, this.entities, player);
 
-    // Remove dead entities, collect drops
+    // Remove dead entities, collect drops, check win
     for (let i = this.entities.length - 1; i >= 0; i--) {
       const e = this.entities[i];
       if (e.dead) {
@@ -215,6 +219,10 @@ export class Game {
           this.scoring.addRunGold(e.drop);
           particles.goldSparkle(e.col * TILE_SIZE + TILE_SIZE / 2, e.row * TILE_SIZE + TILE_SIZE / 2);
           this.audio.gold();
+        }
+        if (e.type === 'firegolem') {
+          this.scoring.bankGold();
+          this.state = STATE.WIN;
         }
         this.entities.splice(i, 1);
       }
@@ -299,6 +307,15 @@ export class Game {
     }
   }
 
+  _updateWin(_delta) {
+    let action;
+    while ((action = this.input.consume())) {
+      if (action === 'interact' || action === 'bomb') {
+        this.state = STATE.MENU;
+      }
+    }
+  }
+
   // ── Entity Spawning ───────────────────────────────────────────────────────
 
   _spawnEntities() {
@@ -337,6 +354,11 @@ export class Game {
     }
 
     this.entities.push(enemy);
+
+    // Spawn boss once when player reaches Zone 4
+    if (!this._bossSpawned && depth > 60) {
+      this._trySpawnBoss();
+    }
 
     // Spawn NPC rooms in fresh chunks
     if (row > this._lastSpawnRow + 5) {
@@ -384,6 +406,21 @@ export class Game {
           this.world.setTile(npc.col + dc, npc.row + dr, TILE.EMPTY);
       this.entities.push(npc);
     }
+  }
+
+  _trySpawnBoss() {
+    this._bossSpawned = true;
+    const player = this.player;
+    // Place boss 6-10 rows below player, near centre
+    const col = Math.max(3, Math.min(23, 10 + Math.floor(Math.random() * 8)));
+    const row = player.row + 6 + Math.floor(Math.random() * 5);
+    this.world.ensureGenerated(row + 6);
+    const boss = new FireGolem(col, row);
+    // Clear 4×4 footprint plus 1-tile border above for visibility
+    for (let dr = -1; dr < 5; dr++)
+      for (let dc = -1; dc < 5; dc++)
+        this.world.setTile(col + dc, row + dr, TILE.EMPTY);
+    this.entities.push(boss);
   }
 
   _tryInteractNPC() {
@@ -453,6 +490,10 @@ export class Game {
 
       case STATE.GAME_OVER:
         drawGameOver(ctx, this.scoring, this._phase);
+        break;
+
+      case STATE.WIN:
+        drawWin(ctx, this.scoring, this._phase);
         break;
     }
   }
