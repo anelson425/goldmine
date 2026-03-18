@@ -71,8 +71,9 @@ export function drawHUD(ctx, player, scoring, depth) {
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.fillRect(0, itemY - 4, 160, 28);
   ctx.font = '11px monospace';
-  if (player.hasBomb)    { ctx.fillStyle = '#ff7043'; ctx.fillText('[B]Bomb',   itemX, itemY + 14); itemX += 60; }
-  if (player.hasRope)    { ctx.fillStyle = '#a5d6a7'; ctx.fillText('[R]Rope',   itemX, itemY + 14); itemX += 60; }
+  if (player.hasBomb)       { ctx.fillStyle = '#ff7043'; ctx.fillText('[B]Bomb',    itemX, itemY + 14); itemX += 60; }
+  if (player.hasRope)       { ctx.fillStyle = '#a5d6a7'; ctx.fillText('[R]Rope',    itemX, itemY + 14); itemX += 60; }
+  if (player.hasLifeJacket) { ctx.fillStyle = '#29b6f6'; ctx.fillText('LifeJacket', itemX, itemY + 14); itemX += 80; }
   if (player.ghostMode > 0) {
     ctx.fillStyle = '#ce93d8';
     ctx.fillText(`Ghost ${player.ghostMode.toFixed(0)}s`, itemX, itemY + 14);

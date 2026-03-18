@@ -42,7 +42,8 @@ export class Player {
     this.hasRope       = false;
     this.ghostMode     = 0;      // seconds remaining
     this.iFrames       = 0;      // seconds of invincibility remaining after a hit
-    this.pendingMinion = false;  // set by shop; game.js spawns the entity
+    this.pendingMinion  = false;  // set by shop; game.js spawns the entity
+    this.hasLifeJacket  = false;  // immune to water damage when true
     this.minion        = null;   // reference to active Minion entity
 
     // Previous grid position — used by minion to follow one tile behind
@@ -96,8 +97,8 @@ export class Player {
     }
 
     if (def.hazard) {
-      // Water — damage and push back
-      this.takeDamage(def.hazardDamage ?? 20);
+      // Water — damage and push back (life jacket negates water damage)
+      if (!this.hasLifeJacket) this.takeDamage(def.hazardDamage ?? 20);
       this._moveCooldown = MOVE_COOLDOWN_MS;
       return;
     }

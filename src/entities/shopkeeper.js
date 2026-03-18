@@ -6,9 +6,10 @@ _img.onload = () => { _imgReady = true; };
 _img.src = 'assets/secret_shop.png';
 
 const ITEMS = [
-  { id: 'bomb',   label: 'Bomb (5×5 blast)',    cost: 80,  apply: (p) => { p.hasBomb = true; } },
-  { id: 'rope',   label: 'Rope (surface warp)',  cost: 120, apply: (p) => { p.hasRope = true; } },
-  { id: 'minion', label: 'Minion (follows you)', cost: 150, apply: (p) => { p.pendingMinion = true; } },
+  { id: 'bomb',       label: 'Bomb (5×5 blast)',    cost: 80,  apply: (p) => { p.hasBomb = true; } },
+  { id: 'rope',       label: 'Rope (surface warp)',  cost: 120, apply: (p) => { p.hasRope = true; } },
+  { id: 'minion',     label: 'Minion (follows you)', cost: 150, apply: (p) => { p.pendingMinion = true; } },
+  { id: 'lifejacket', label: 'Life Jacket (water)',  cost: 100, apply: (p) => { p.hasLifeJacket = true; } },
 ];
 
 export class Shopkeeper {
