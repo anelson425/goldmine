@@ -22,9 +22,7 @@ export class Shopkeeper {
     this._message = null;
     this._msgTimer= 0;
 
-    // Pick 3 random items for this shop
-    const shuffled = [...ITEMS].sort(() => Math.random() - 0.5);
-    this.stock = shuffled.slice(0, 3);
+    this.stock = [...ITEMS];
     this.selectedIdx = 0;
     this.open = false;
   }
