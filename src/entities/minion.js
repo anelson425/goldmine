@@ -15,6 +15,7 @@ export class Minion {
     this.maxHp  = hp;
     this.drop   = 0;
     this._phase = 0;
+    this.facing = 'right';
 
     // Pixel position for smooth rendering
     this.px = col * TILE_SIZE;
@@ -31,8 +32,9 @@ export class Minion {
     this._phase += delta;
 
     // Follow the tile the player just left
-    this.col = player._prevCol;
-    this.row = player._prevRow;
+    this.col    = player._prevCol;
+    this.row    = player._prevRow;
+    this.facing = player.facing;
 
     // Smooth pixel lerp
     this.px += (this.col * TILE_SIZE - this.px) * Math.min(1, delta * 12);
@@ -44,13 +46,20 @@ export class Minion {
     const T = TILE_SIZE;
     const { sx, sy } = camera.worldToScreen(this.px, this.py);
 
+    ctx.save();
     ctx.imageSmoothingEnabled = false;
     if (_imgReady) {
-      ctx.drawImage(_img, sx, sy, T, T);
+      if (this.facing === 'left') {
+        ctx.scale(-1, 1);
+        ctx.drawImage(_img, -sx - T, sy, T, T);
+      } else {
+        ctx.drawImage(_img, sx, sy, T, T);
+      }
     } else {
       ctx.fillStyle = '#7c4dff';
       ctx.fillRect(sx + 4, sy + 4, T - 8, T - 8);
     }
+    ctx.restore();
 
     // HP bar
     const pct = this.hp / this.maxHp;
