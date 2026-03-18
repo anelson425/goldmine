@@ -59,7 +59,12 @@
 - [x] `.gitignore` for Windows, macOS, Node.js, and IDE files
 - [x] Custom domain: `playgoldmine.com` (GitHub Pages CNAME)
 
-### Phase 7 — New Content & Bug Fixes
+### Phase 7 — New Content, Boss & Minion
+- [x] `src/entities/minion.js` — purchasable companion (150g from secret shop); follows one tile behind player, absorbs all damage before player is hit, HP = half player's current HP at purchase time; only one at a time
+- [x] Secret shop now has 3 items: Bomb (80g), Rope (120g), Minion (150g)
+- [x] Player tracks `_prevCol/_prevRow` for minion follow; `takeDamage` redirects to minion while alive; rope also teleports minion
+
+### Phase 7 — Bug Fixes
 - [x] Secret shop UI fixed: full-screen overlay (STATE.SECRET_SHOP), proper keyboard navigation
 - [x] Secret shop spends run gold first, then banked gold (`scoring.spendAny()`)
 - [x] Bomb radius expanded to 5×5; Rope key restored (R or C)
@@ -74,9 +79,6 @@
 ---
 
 ## Todo — Phase 8
-
-### NPCs & Enemies
-- [ ] Add minions purchasable from secret shop: follow player, absorb damage first, boost attack slightly, start with half player HP
 
 ### Art
 - [ ] Add new pixel art graphics for all tiles (dirt, stone, sand, ore, lava, water, etc.)

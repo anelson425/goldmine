@@ -38,10 +38,16 @@ export class Player {
     this.facing = 'right';
 
     // Inventory (special items from NPCs)
-    this.hasBomb     = false;
-    this.hasRope     = false;
-    this.ghostMode   = 0;        // seconds remaining
-    this.iFrames     = 0;        // seconds of invincibility remaining after a hit
+    this.hasBomb       = false;
+    this.hasRope       = false;
+    this.ghostMode     = 0;      // seconds remaining
+    this.iFrames       = 0;      // seconds of invincibility remaining after a hit
+    this.pendingMinion = false;  // set by shop; game.js spawns the entity
+    this.minion        = null;   // reference to active Minion entity
+
+    // Previous grid position — used by minion to follow one tile behind
+    this._prevCol = this.col;
+    this._prevRow = this.row;
 
     // Pixel position for smooth rendering (interpolated)
     this.px = this.col * TILE_SIZE;
@@ -107,6 +113,8 @@ export class Player {
       const { destroyed, reward } = this.world.digTile(tc, tr, strength);
       if (destroyed) {
         this.scoring.addRunGold(reward);
+        this._prevCol = this.col;
+        this._prevRow = this.row;
         this.col = tc;
         this.row = tr;
       }
@@ -118,6 +126,8 @@ export class Player {
 
     if (!def.solid || this.ghostMode > 0) {
       // Move freely
+      this._prevCol = this.col;
+      this._prevRow = this.row;
       this.col = tc;
       this.row = tr;
       this.digTarget = null;   // clear stale reference to prevent false destroy-detection
@@ -141,14 +151,27 @@ export class Player {
   useRope() {
     if (!this.hasRope) return;
     this.hasRope = false;
+    this._prevCol = this.col;
+    this._prevRow = this.row;
     this.row = 2;
     this.col = 15;
     this.px = this.col * TILE_SIZE;
     this.py = this.row * TILE_SIZE;
+    if (this.minion && !this.minion.dead) {
+      this.minion.col = 15;
+      this.minion.row = 3;
+      this.minion.px  = this.minion.col * TILE_SIZE;
+      this.minion.py  = this.minion.row * TILE_SIZE;
+    }
   }
 
   takeDamage(amount) {
     if (this.iFrames > 0) return;
+    if (this.minion && !this.minion.dead) {
+      this.minion.takeDamage(amount);
+      this.iFrames = 0.3;
+      return;
+    }
     this.hp = Math.max(0, this.hp - amount);
     this.iFrames = 0.5;
     if (this.hp <= 0) this._die();

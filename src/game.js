@@ -11,6 +11,7 @@ import { Wizard }      from './entities/wizard.js';
 import { Shopkeeper }  from './entities/shopkeeper.js';
 import { MinerGhost }  from './entities/minerghost.js';
 import { FireGolem }   from './entities/firegolem.js';
+import { Minion }      from './entities/minion.js';
 import { Input }       from './input.js';
 import { Scoring }     from './systems/scoring.js';
 import { Renderer }    from './systems/renderer.js';
@@ -197,7 +198,8 @@ export class Game {
     // Update entities
     for (const e of this.entities) {
       if (typeof e.update === 'function') {
-        e.update(delta, world, player, camera);
+        if (e.type === 'minion') e.update(delta, player);
+        else e.update(delta, world, player, camera);
       }
       // Ghost auto-triggers hint when player is adjacent
       if (e.type === 'minerghost' && !e._showing) {
@@ -224,6 +226,9 @@ export class Game {
         if (e.type === 'firegolem') {
           this.scoring.bankGold();
           this.state = STATE.WIN;
+        }
+        if (e.type === 'minion') {
+          this.player.minion = null;
         }
         this.entities.splice(i, 1);
       }
@@ -288,6 +293,15 @@ export class Game {
         if (sk.buy(this.player, this.scoring, this.audio) !== false) {
           this._shopMsg      = sk._message || '';
           this._shopMsgTimer = 2;
+          if (this.player.pendingMinion) {
+            this.player.pendingMinion = false;
+            // Replace any existing minion
+            const old = this.entities.findIndex(e => e.type === 'minion');
+            if (old !== -1) this.entities.splice(old, 1);
+            const minion = new Minion(this.player.col, this.player.row + 1, Math.max(1, Math.floor(this.player.hp / 2)));
+            this.player.minion = minion;
+            this.entities.push(minion);
+          }
         }
       }
       if (action === 'rope') {

@@ -94,6 +94,7 @@ Bump into enemies to attack them. Damage dealt equals your pickaxe level.
 |---|---|---|
 | Bomb | 80g | Destroys a 5×5 area centred on player |
 | Rope | 120g | Teleports player instantly to the surface |
+| Minion | 150g | Companion that follows one tile behind and absorbs all damage before you are hit (one at a time) |
 
 ---
 
